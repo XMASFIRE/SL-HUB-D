@@ -1,0 +1,223 @@
+repeat task.wait() until game:IsLoaded()
+
+if getgenv().SL_LOADER_EXECUTED then return end
+getgenv().SL_LOADER_EXECUTED = true
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local LocalPlayer = Players.LocalPlayer
+
+LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+pcall(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    settings().Network.IncomingReplicationLag = 0
+end)
+
+local MAIN_KEY = "SLONTOP"
+local EXECUTE_SCRIPT = "https://raw.githubusercontent.com/SlGHOST0/SL-HUB-PUBLIC/refs/heads/main/PLACE%20ID%20OBF"
+local GET_KEY_LINK = "https://discord.gg/cwGhMTNDds"
+
+local Gui = Instance.new("ScreenGui", game.CoreGui)
+Gui.Name = "SL_KEY_SYSTEM"
+Gui.ResetOnSpawn = false
+
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.new(0,360,0,230)
+Main.Position = UDim2.new(0.5,-180,0.5,-115)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Instance.new("UICorner", Main)
+
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Thickness = 2
+
+local hue = 0
+RunService.RenderStepped:Connect(function()
+	hue = (hue + 0.003) % 1
+	Stroke.Color = Color3.fromHSV(hue,1,1)
+end)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1,0,0,45)
+Title.BackgroundTransparency = 1
+Title.Text = "ًں”’SL HUB KEY SYSTEM"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+RunService.RenderStepped:Connect(function()
+	Title.TextColor3 = Color3.fromHSV(hue,1,1)
+end)
+
+local Box = Instance.new("TextBox", Main)
+Box.Size = UDim2.new(0.85,0,0,40)
+Box.Position = UDim2.new(0.075,0,0.35,0)
+Box.PlaceholderText = "ENTER KEY"
+Box.Text = ""
+Box.Font = Enum.Font.Gotham
+Box.TextSize = 14
+Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Box.TextColor3 = Color3.fromRGB(255,255,255)
+Box.PlaceholderColor3 = Color3.fromRGB(180,180,180)
+Box.ClearTextOnFocus = false
+Instance.new("UICorner", Box)
+
+local function Button(text,pos)
+	local btn = Instance.new("TextButton", Main)
+	btn.Size = UDim2.new(0.4,0,0,36)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", btn)
+	RunService.RenderStepped:Connect(function()
+		btn.TextColor3 = Color3.fromHSV(hue,1,1)
+	end)
+	return btn
+end
+
+local Verify = Button("VERIFY", UDim2.new(0.075,0,0.65,0))
+local GetKey = Button("GET KEY", UDim2.new(0.525,0,0.65,0))
+
+Verify.MouseButton1Click:Connect(function()
+	local key = string.upper(string.gsub(Box.Text,"%s+",""))
+	if key == MAIN_KEY then
+		Title.Text = "EXECUTEING..."
+		Box.Visible = false
+		Verify.Visible = false
+		GetKey.Visible = false
+		task.wait(0.8)
+		Gui:Destroy()
+		pcall(function()
+			loadstring(game:HttpGet(EXECUTE_SCRIPT))()
+		end)
+	else
+		Box.Text = ""
+		Box.PlaceholderText = "WRONG KEY!"
+	end
+end)
+
+GetKey.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard(GET_KEY_LINK)
+	end
+end)repeat task.wait() until game:IsLoaded()
+
+if getgenv().SL_LOADER_EXECUTED then return end
+getgenv().SL_LOADER_EXECUTED = true
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local LocalPlayer = Players.LocalPlayer
+
+LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+pcall(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    settings().Network.IncomingReplicationLag = 0
+end)
+
+local MAIN_KEY = "SLONTOP"
+local EXECUTE_SCRIPT = "https://raw.githubusercontent.com/SlGHOST0/ANTI-AFK/refs/heads/main/Place%20id"
+local GET_KEY_LINK = "https://discord.gg/5hYUFxKnPa"
+
+local Gui = Instance.new("ScreenGui", game.CoreGui)
+Gui.Name = "SL_KEY_SYSTEM"
+Gui.ResetOnSpawn = false
+
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.new(0,360,0,230)
+Main.Position = UDim2.new(0.5,-180,0.5,-115)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Instance.new("UICorner", Main)
+
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Thickness = 2
+
+local hue = 0
+RunService.RenderStepped:Connect(function()
+	hue = (hue + 0.003) % 1
+	Stroke.Color = Color3.fromHSV(hue,1,1)
+end)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1,0,0,45)
+Title.BackgroundTransparency = 1
+Title.Text = "ًں”’SL HUB KEY SYSTEM"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+RunService.RenderStepped:Connect(function()
+	Title.TextColor3 = Color3.fromHSV(hue,1,1)
+end)
+
+local Box = Instance.new("TextBox", Main)
+Box.Size = UDim2.new(0.85,0,0,40)
+Box.Position = UDim2.new(0.075,0,0.35,0)
+Box.PlaceholderText = "ENTER KEY"
+Box.Text = ""
+Box.Font = Enum.Font.Gotham
+Box.TextSize = 14
+Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Box.TextColor3 = Color3.fromRGB(255,255,255)
+Box.PlaceholderColor3 = Color3.fromRGB(180,180,180)
+Box.ClearTextOnFocus = false
+Instance.new("UICorner", Box)
+
+local function Button(text,pos)
+	local btn = Instance.new("TextButton", Main)
+	btn.Size = UDim2.new(0.4,0,0,36)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", btn)
+	RunService.RenderStepped:Connect(function()
+		btn.TextColor3 = Color3.fromHSV(hue,1,1)
+	end)
+	return btn
+end
+
+local Verify = Button("VERIFY", UDim2.new(0.075,0,0.65,0))
+local GetKey = Button("GET KEY", UDim2.new(0.525,0,0.65,0))
+
+Verify.MouseButton1Click:Connect(function()
+	local key = string.upper(string.gsub(Box.Text,"%s+",""))
+	if key == MAIN_KEY then
+		Title.Text = "EXECUTEING..."
+		Box.Visible = false
+		Verify.Visible = false
+		GetKey.Visible = false
+		task.wait(0.8)
+		Gui:Destroy()
+		pcall(function()
+			loadstring(game:HttpGet(EXECUTE_SCRIPT))()
+		end)
+	else
+		Box.Text = ""
+		Box.PlaceholderText = "WRONG KEY!"
+	end
+end)
+
+GetKey.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard(GET_KEY_LINK)
+	end
+end)
