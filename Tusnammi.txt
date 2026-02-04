@@ -1,11 +1,11 @@
 
-local WindUI = (loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/Gui/refs/heads/main/Tusnami%20gui")))();
+local WindUI = (loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/Gui/refs/heads/main/Los%20gui")))();
 local Window = WindUI:CreateWindow({
 	Title = "SL HUB",
 	Author = "Escape Tsunami For Brainrots",
-	Folder = "SL HUB",
+	Folder = "SL HUB                 BY SL_GHOST👻",
 	Icon = "rbxassetid://119025343914379",
-	Background = "rbxassetid://114411419357962",
+	Background = "rbxassetid://93825854125347",
 	Size = UDim2.fromOffset(450, 300),
 	MinSize = Vector2.new(520, 330),
 	Transparent = false,
@@ -1574,13 +1574,13 @@ ServerSection = Tabs.ServerTab:Section({
 RejoinServerButton = ServerSection:Button({
 	Title = "Rejoin Server",
 	Callback = function()
-		RelzhubModule:Rejoin()
+		SlhubModule:Rejoin()
 	end
 });
 HopServerButton = ServerSection:Button({
 	Title = "Hop Server",
 	Callback = function()
-		RelzhubModule:HopServer(true)
+		SlhubModule:HopServer(true)
 	end
 });
 ServerSection:Divider();
@@ -1605,6 +1605,6 @@ JobIdInput = ServerSection:Input({
 JoinJobIdServerButton = ServerSection:Button({
 	Title = "Join Job ID",
 	Callback = function()
-		SL HUBModule:JoinJobId(_G.JobId)
+		SlhubModule:JoinJobId(_G.JobId)
 	end
 });
