@@ -1,5 +1,5 @@
 
-local WindUI = (loadstring(game:HttpGet("https://raw.githubusercontent.com/SlGHOST0/SL-HUB-PUBLIC/refs/heads/main/Gui%20(9).txt")))();
+local WindUI = (loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/Gui/refs/heads/main/Tusnami%20gui")))();
 local Window = WindUI:CreateWindow({
 	Title = "SL HUB",
 	Author = "Escape Tsunami For Brainrots",
