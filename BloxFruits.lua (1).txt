@@ -1,5 +1,5 @@
 
-local WindUI = (loadstring(game:HttpGet("https://relzhub.farrelghibran.com/lib/lib.lua")))();
+local WindUI = (loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/Gui/refs/heads/main/Blox%20fruit%20gui.txt")))();
 local Window = WindUI:CreateWindow({
 	Title = "SL HUB",
 	Author = "BLOX FRUIT",
