@@ -4,8 +4,8 @@ local Window = WindUI:CreateWindow({
 	Title = "SL HUB",
 	Author = "BLOX FRUIT",
 	Folder = "SL HUB",
-	Icon = "rbxassetid://90925193320313",
-	Background = "rbxassetid://114411419357961",
+	Icon = "rbxassetid://119025343914379",
+	Background = "rbxassetid://93825854125347",
 	Size = UDim2.fromOffset(450, 300),
 	MinSize = Vector2.new(520, 330),
 	Transparent = false,
@@ -15,7 +15,7 @@ local Window = WindUI:CreateWindow({
 	ScrollBarEnabled = false
 });
 WindUI:AddTheme({
-    Name = "RelzHub Theme",
+    Name = SL HUB Theme",
     Accent = Color3.fromHex("#18181b"),
     Background = Color3.fromHex("#101010"),
     Outline = Color3.fromHex("#FFFFFF"),
@@ -34,9 +34,9 @@ WindUI:AddTheme({
 				Rotation = 0,                                                               
 			}),
 })
-WindUI:SetTheme("Slhub Theme")
+WindUI:SetTheme ("SL HUB Theme")
 Window:EditOpenButton({
-	Icon = "rbxassetid://90925193320313",
+	Icon = "rbxassetid://119025343914379",
 	CornerRadius = UDim.new(0, 10),
 	Position = UDim2.new(0, 75, 0, 100),
 	OnlyMobile = false,
