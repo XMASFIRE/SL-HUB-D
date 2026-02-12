@@ -1,0 +1,3970 @@
+local WindUI = (loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/Gui/refs/heads/main/Los%20gui")))();
+local Window = WindUI:CreateWindow({
+	Title = "SL HUB",
+	Author = "Grow a Garden",
+	Folder = "SL Hub",
+	Icon = "rbxassetid://119025343914379",
+	Background = "rbxassetid://93825854125347",
+	Size = UDim2.fromOffset(300, 200),
+	Transparent = false,
+	Theme = "Dark",
+	SideBarWidth = 160,
+	HideSearchBar = true,
+	ScrollBarEnabled = false
+});
+Window:EditOpenButton({
+	Icon = "rbxassetid://119025343914379",
+	CornerRadius = UDim.new(0, 10),
+	Position = UDim2.new(0, 75, 0, 100),
+	OnlyMobile = false,
+	Enabled = true,
+	Draggable = true
+});
+local ConfigManager = Window.ConfigManager;
+local Config = ConfigManager:CreateConfig("Grow a Garden Config");
+Window:CreateTopbarButton("Save Config", "save", function()
+	Config:Save();
+	WindUI:Notify({
+		Title = "Config Saved!",
+		Content = "Config automatically loads when the script is run",
+		Icon = "rbxassetid://119025343914379",
+		Duration = 5
+	});
+end, 990);
+Window:CreateTopbarButton("Reset Config", "trash-2", function()
+	if isfile("WindUI/SL Hub/config/Grow a Garden Config.json") then
+		delfile("WindUI/SL Hub/config/Grow a Garden Config.json");
+		WindUI:Notify({
+			Title = "Config Deleted!",
+			Content = "Config reset to default",
+			Icon = "rbxassetid://119025343914379",
+			Duration = 5
+		});
+	end;
+end, 989);
+local Tabs = {
+	InfoTab = Window:Tab({
+		Title = "Info",
+		Icon = "info",
+		ShowTabTitle = false
+	}),
+	MainTab = Window:Tab({
+		Title = "Main",
+		Icon = "rbxassetid://10723407389",
+		ShowTabTitle = false
+	}),
+	UtilityTab = Window:Tab({
+		Title = "Utility",
+		Icon = "wrench",
+		ShowTabTitle = false
+	}),
+	CraftTab = Window:Tab({
+		Title = "Craft",
+		Icon = "pencil",
+		ShowTabTitle = false
+	}),
+	EventTab = Window:Tab({
+		Title = "Event",
+		Icon = "party-popper",
+		ShowTabTitle = false
+	}),
+	ShopTab = Window:Tab({
+		Title = "Shop",
+		Icon = "shopping-bag",
+		ShowTabTitle = false
+	}),
+	StockTab = Window:Tab({
+		Title = "Stock",
+		Icon = "timer",
+		ShowTabTitle = false
+	}),
+	PlayerTab = Window:Tab({
+		Title = "Player",
+		Icon = "user",
+		ShowTabTitle = false
+	}),
+	CalculationTab = Window:Tab({
+		Title = "Calculation",
+		Icon = "sigma",
+		ShowTabTitle = false
+	}),
+	PetTab = Window:Tab({
+		Title = "Pet",
+		Icon = "egg",
+		ShowTabTitle = false
+	}),
+	MiscTab = Window:Tab({
+		Title = "Misc",
+		Icon = "settings",
+		ShowTabTitle = false
+	}),
+	ServerTab = Window:Tab({
+		Title = "Server",
+		Icon = "server",
+		ShowTabTitle = false
+	})
+};
+Window:SelectTab(1);
+ReplicatedStorage = game:GetService("ReplicatedStorage");
+RemoteEvents = ReplicatedStorage:WaitForChild("GameEvents");
+ServerCalculatePlantValue = require(ReplicatedStorage.Modules.CalculatePlantValue);
+ItemModule = require(ReplicatedStorage.Item_Module);
+MutationHandler = require(ReplicatedStorage.Modules.MutationHandler);
+DataService = require(ReplicatedStorage.Modules.DataService);
+PetEggStock = (DataService:GetData()).PetEggStock;
+EggDataModule = require(ReplicatedStorage.Data.PetEggData);
+PetModule = require(ReplicatedStorage.Data.PetRegistry);
+SeedDataModule = require(ReplicatedStorage.Data.SeedData);
+ActivePetModule = require(ReplicatedStorage.Modules.PetServices.ActivePetsService);
+CraftingModule = require(ReplicatedStorage.Data.CraftingData.CraftingRecipeRegistry);
+CosmeticCrateData = require(ReplicatedStorage.Data.CosmeticCrateShopData);
+CosmeticItemData = require(ReplicatedStorage.Data.CosmeticItemShopData);
+TravelingMerchantModule = require(ReplicatedStorage.Data.TravelingMerchant.TravelingMerchantData);
+InventoryModule = require(ReplicatedStorage.Modules.InventoryService);
+FoodData = require(ReplicatedStorage.Data.FoodRecipeData);
+EggsModule = require(ReplicatedStorage.Data.PetRegistry.PetEggs);
+local allEggs = {};
+task.spawn(function()
+	for i, v in pairs(EggsModule) do
+		table.insert(allEggs, i);
+	end;
+end);
+local allFood = {};
+task.spawn(function()
+	for i, v in pairs(FoodData.Recipes) do
+		table.insert(allFood, i);
+	end;
+end);
+function getAllPets()
+	local result = {};
+	for i, v in pairs(PetModule.PetList) do
+		table.insert(result, i);
+	end;
+	return result;
+end;
+local petRarities = {};
+task.spawn(function()
+	for i, v in pairs(PetModule.PetRarities) do
+		table.insert(petRarities, i);
+	end;
+end);
+function getPetRarities()
+	local result = {};
+	for i, v in pairs(PetModule.PetRarities) do
+		table.insert(result, i);
+	end;
+	return result;
+end;
+function getPetRarity(pet)
+	for i, v in pairs(PetModule.PetList) do
+		if i == pet then
+			return v.Rarity;
+		end;
+	end;
+end;
+function getTravelingMerchantData()
+	local result = {};
+	for i, v in pairs(TravelingMerchantModule) do
+		for shop, a in pairs(v.ShopData) do
+			table.insert(result, shop);
+		end;
+	end;
+	return result;
+end;
+function getNil(name, class)
+	for _, v in next, getnilinstances() do
+		if v.ClassName == class and v.Name == name then
+			return v;
+		end;
+	end;
+end;
+function getAllRecipes()
+	local result = {};
+	for i, v in pairs(CraftingModule.ItemRecipes) do
+		table.insert(result, i);
+	end;
+	return result;
+end;
+function getRecipesInput(item)
+	local result = {};
+	for i, v in pairs(CraftingModule.ItemRecipes[item].Inputs) do
+		table.insert(result, v);
+	end;
+	return result;
+end;
+function getRecipesInputType(item, name)
+	for i, v in pairs(CraftingModule.ItemRecipes[item].Inputs) do
+		if v.ItemData and v.ItemData.ItemName == name then
+			return v.ItemType;
+		end;
+	end;
+end;
+function getInputedSeedCraft()
+	local result = {};
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData.SeedEventWorkbench.MachineData.SeedEventWorkbench.InputItems) do
+		table.insert(result, v.ItemData.ItemName);
+	end;
+	return result;
+end;
+function getInputedGearCraft()
+	local result = {};
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData["Workbench-1"].MachineData.GearEventWorkbench.InputItems) do
+		table.insert(result, v.ItemData.ItemName);
+	end;
+	return result;
+end;
+function getInputedDinoCraft()
+	local result = {};
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData.DinoEventWorkbench.MachineData.DinoEventWorkbench.InputItems) do
+		table.insert(result, v.ItemData.ItemName);
+	end;
+	return result;
+end;
+function checkGearCraftRecipeId()
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData["Workbench-1"].MachineData) do
+		return v.RecipeId;
+	end;
+end;
+function checkSeedCraftRecipeId()
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData.SeedEventWorkbench.MachineData) do
+		return v.RecipeId;
+	end;
+end;
+function checkDinoCraftRecipeId()
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData.DinoEventWorkbench.MachineData) do
+		return v.RecipeId;
+	end;
+end;
+function startCraftSeed()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Craft", (workspace:WaitForChild("CraftingTables")):WaitForChild("SeedEventCraftingWorkBench"), "SeedEventWorkbench");
+end;
+function startCraftGear()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Craft", (workspace:WaitForChild("CraftingTables")):WaitForChild("EventCraftingWorkBench"), "GearEventWorkbench");
+end;
+function startCraftDino()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Craft", (((workspace:WaitForChild("Interaction")):WaitForChild("UpdateItems")):WaitForChild("DinoEvent")):WaitForChild("DinoCraftingTable"), "DinoEventWorkbench");
+end;
+function isGearInputCompleated(target)
+	local inputedItems = getInputedGearCraft();
+	if #inputedItems == 0 then
+		return false;
+	end;
+	for _, input in pairs(getRecipesInput(target)) do
+		if not table.find(inputedItems, input.ItemData.ItemName) then
+			return false;
+		end;
+	end;
+	return true;
+end;
+function isSeedInputCompleated(target)
+	local inputedItems = getInputedSeedCraft();
+	if #inputedItems == 0 then
+		return false;
+	end;
+	for _, input in pairs(getRecipesInput(target)) do
+		if not table.find(inputedItems, input.ItemData.ItemName) then
+			return false;
+		end;
+	end;
+	return true;
+end;
+function isDinoInputCompleated(target)
+	local inputedItems = getInputedDinoCraft();
+	if #inputedItems == 0 then
+		return false;
+	end;
+	for _, input in pairs(getRecipesInput(target)) do
+		if not table.find(inputedItems, input.ItemData.ItemName) then
+			return false;
+		end;
+	end;
+	return true;
+end;
+function checkGearCraftIsDone()
+	local isDone = nil;
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData["Workbench-1"].MachineData.GearEventWorkbench.CraftingItems) do
+		if v.IsDone then
+			isDone = v.IsDone;
+			break;
+		end;
+	end;
+	return isDone;
+end;
+function checkSeedCraftIsDone()
+	local isDone = nil;
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData.SeedEventWorkbench.MachineData.SeedEventWorkbench.CraftingItems) do
+		if v.IsDone then
+			isDone = v.IsDone;
+			break;
+		end;
+	end;
+	return isDone;
+end;
+function checkDinoCraftIsDone()
+	local isDone = nil;
+	for i, v in pairs((DataService:GetData()).CraftingData.GlobalCraftingObjectData.DinoEventWorkbench.MachineData.DinoEventWorkbench.CraftingItems) do
+		if v.IsDone then
+			isDone = v.IsDone;
+			break;
+		end;
+	end;
+	return isDone;
+end;
+function getAllBackpack()
+	local result = {};
+	for i, v in pairs((game:GetService("Players")).LocalPlayer.Backpack:GetChildren()) do
+		table.insert(result, v);
+	end;
+	return result;
+end;
+function getUUIDItemBackpack(item)
+	for _, tool in pairs(getAllBackpack()) do
+		if string.find(tool.Name, item) or tool.Name == item then
+			local attributes = tool:GetAttributes();
+			for _, value in pairs(attributes) do
+				if type(value) == "string" and string.find(value, "{") and string.find(value, "}") then
+					return value;
+				end;
+			end;
+		end;
+	end;
+	return nil;
+end;
+function SubmitAllSummerPlants()
+	(RemoteEvents:WaitForChild("SummerHarvestRemoteEvent")):FireServer("SubmitAllPlants");
+end;
+function ClaimGearCraft()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Claim", (workspace:WaitForChild("CraftingTables")):WaitForChild("EventCraftingWorkBench"), "GearEventWorkbench", 1);
+end;
+function ClaimSeedCraft()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Claim", (workspace:WaitForChild("CraftingTables")):WaitForChild("SeedEventCraftingWorkBench"), "SeedEventWorkbench", 1);
+end;
+function ClaimDinoCraft()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Claim", (((workspace:WaitForChild("Interaction")):WaitForChild("UpdateItems")):WaitForChild("DinoEvent")):WaitForChild("DinoCraftingTable"), "DinoEventWorkbench", 1);
+end;
+function CancelSeedCraft()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Cancel", (workspace:WaitForChild("CraftingTables")):WaitForChild("SeedEventCraftingWorkBench"), "SeedEventWorkbench");
+end;
+function CancelGearCraft()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Cancel", (workspace:WaitForChild("CraftingTables")):WaitForChild("EventCraftingWorkBench"), "GearEventWorkbench");
+end;
+function CancelDinoCraft()
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("Cancel", (((workspace:WaitForChild("Interaction")):WaitForChild("UpdateItems")):WaitForChild("DinoEvent")):WaitForChild("DinoCraftingTable"), "DinoEventWorkbench");
+end;
+function setSeedRecipe(name)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("SetRecipe", (workspace:WaitForChild("CraftingTables")):WaitForChild("SeedEventCraftingWorkBench"), "SeedEventWorkbench", name);
+end;
+function setGearRecipe(name)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("SetRecipe", (workspace:WaitForChild("CraftingTables")):WaitForChild("EventCraftingWorkBench"), "GearEventWorkbench", name);
+end;
+function setDinoRecipe(name)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("SetRecipe", (((workspace:WaitForChild("Interaction")):WaitForChild("UpdateItems")):WaitForChild("DinoEvent")):WaitForChild("DinoCraftingTable"), "DinoEventWorkbench", name);
+end;
+function InputSeedCraftItem(item, index, uuid)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("InputItem", (workspace:WaitForChild("CraftingTables")):WaitForChild("SeedEventCraftingWorkBench"), "SeedEventWorkbench", index, {
+		ItemType = item,
+		ItemData = {
+			UUID = uuid
+		}
+	});
+end;
+function InputGearCraftItem(item, index, uuid)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("InputItem", (workspace:WaitForChild("CraftingTables")):WaitForChild("EventCraftingWorkBench"), "GearEventWorkbench", index, {
+		ItemType = item,
+		ItemData = {
+			UUID = uuid
+		}
+	});
+end;
+function InputDinoCraftItem(item, index, uuid)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("CraftingGlobalObjectService")):FireServer("InputItem", (((workspace:WaitForChild("Interaction")):WaitForChild("UpdateItems")):WaitForChild("DinoEvent")):WaitForChild("DinoCraftingTable"), "DinoEventWorkbench", index, {
+		ItemType = item,
+		ItemData = {
+			UUID = uuid
+		}
+	});
+end;
+local craftGearList = {};
+task.spawn(function()
+	for i, v in pairs(CraftingModule.RecipiesSortedByMachineType.GearEventWorkbench) do
+		table.insert(craftGearList, i);
+	end;
+end);
+local craftSeedList = {};
+task.spawn(function()
+	for i, v in pairs(CraftingModule.RecipiesSortedByMachineType.SeedEventWorkbench) do
+		table.insert(craftSeedList, i);
+	end;
+end);
+local craftDinoList = {};
+task.spawn(function()
+	for i, v in pairs(CraftingModule.RecipiesSortedByMachineType.DinoEventWorkbench) do
+		table.insert(craftDinoList, i);
+	end;
+end);
+function getActivePet()
+	local result = {};
+	for i, v in pairs(ActivePetModule.ClientPetState[game.Players.LocalPlayer.Name]) do
+		table.insert(result, v);
+	end;
+	return result;
+end;
+function getPetNameByUUID(petUUID)
+	return (ActivePetModule:GetPetData(game.Players.LocalPlayer.Name, petUUID)).PetType;
+end;
+local petList = {};
+task.spawn(function()
+	for i, v in pairs(ActivePetModule.ClientPetState[game.Players.LocalPlayer.Name]) do
+		table.insert(petList, i);
+	end;
+end);
+function GetMyPetMover()
+	local result = {};
+	for i, v in pairs((game:GetService("Workspace")).PetsPhysical:GetChildren()) do
+		for myPet, tb in pairs(ActivePetModule.ClientPetState[game.Players.LocalPlayer.Name]) do
+			if v:FindFirstChild(myPet) then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function feedPet(pet)
+	(RemoteEvents:WaitForChild("ActivePetService")):FireServer("Feed", pet);
+end;
+function setTextColor(text, color)
+	return "<font color=\"rgb(" .. color .. ")\">" .. text .. "</font>";
+end;
+function UnequipPet(pet)
+	(RemoteEvents:WaitForChild("ActivePetService")):FireServer("UnequipPet", pet);
+end;
+function getAllSeedData()
+	local res = {};
+	for i, v in ItemModule.Return_All_Data() do
+		table.insert(res, v);
+	end;
+	return res;
+end;
+function sortTableAbjad(tbl)
+	table.sort(tbl, function(a, b)
+		return a:lower() < b:lower();
+	end);
+	return tbl;
+end;
+local allSeeds = {};
+task.spawn(function()
+	for i, v in pairs(SeedDataModule) do
+		table.insert(allSeeds, i);
+	end;
+end);
+local allPlants = sortTableAbjad(allSeeds);
+function CalculatePlantValue(plantInstance)
+	local itemString = plantInstance:FindFirstChild("Item_String") or plantInstance.Name;
+	if not itemString then
+		return 0;
+	end;
+	local variant = plantInstance:FindFirstChild("Variant");
+	if not variant then
+		return 0;
+	end;
+	local weight = plantInstance:FindFirstChild("Weight");
+	if not weight then
+		return 0;
+	end;
+	local itemData = ItemModule.Return_Data(itemString.Value or plantInstance.Name);
+	if not itemData or #itemData < 3 then
+		warn("CalculatePlantValue | ItemData is invalid");
+		return 0;
+	end;
+	local baseValue = itemData[3];
+	local multiplier = itemData[2];
+	local variantMultiplier = ItemModule.Return_Multiplier(variant.Value);
+	local mutationMultiplier = MutationHandler:CalcValueMulti(plantInstance);
+	local finalValue = baseValue * mutationMultiplier * variantMultiplier;
+	local weightValue = weight.Value;
+	local clampedWeight = math.clamp(weightValue / multiplier, 0.95, 100000000);
+	local resultValue = finalValue * clampedWeight ^ 2;
+	return math.round(resultValue);
+end;
+function isMultiHarvest(target)
+	if target:FindFirstChild("Fruits") and #target.Fruits:GetChildren() > 0 then
+		return true;
+	end;
+	return false;
+end;
+function checkHarvest(target)
+	if target:FindFirstChild("Fruits") and #target.Fruits:GetChildren() > 0 then
+		return true;
+	elseif not target:FindFirstChild("Fruits") then
+		return true;
+	end;
+	return false;
+end;
+local function GetLowestPosition(model)
+	if not model or (not model:IsA("Model")) then
+		return nil;
+	end;
+	local lowestPos = nil;
+	for _, part in ipairs(model:GetDescendants()) do
+		if part:IsA("BasePart") then
+			local partBottomPos = part.Position - Vector3.new(0, part.Size.Y / 2, 0);
+			if lowestPos == nil or partBottomPos.Y < lowestPos.Y then
+				lowestPos = partBottomPos;
+			end;
+		end;
+	end;
+	return lowestPos;
+end;
+function generateRainbowColor()
+	local result = "";
+	for i = 1, 3 do
+		result = result .. math.random(0, 255) .. ",";
+	end;
+	return result;
+end;
+function generateRarityColor(rarity)
+	if rarity == "Common" then
+		return "255, 255, 255";
+	elseif rarity == "Uncommon" then
+		return "0, 255, 0";
+	elseif rarity == "Rare" then
+		return "0, 0, 255";
+	elseif rarity == "Legendary" then
+		return "255, 255, 0";
+	elseif rarity == "Mythical" then
+		return "170, 85, 255";
+	elseif rarity == "Divine" then
+		return "255, 85, 0";
+	elseif rarity == "Prismatic" then
+		return "255, 0, 255";
+	else
+		return "255, 255, 255";
+	end;
+end;
+function sortItemsByRarity(items)
+	local rarityOrder = {
+		"Common",
+		"Uncommon",
+		"Rare",
+		"Legendary",
+		"Mythical",
+		"Divine",
+		"Prismatic"
+	};
+	local function getRarityIndex(rarity)
+		for i, v in ipairs(rarityOrder) do
+			if v == rarity then
+				return i;
+			end;
+		end;
+		return (#rarityOrder) + 1;
+	end;
+	table.sort(items, function(a, b)
+		return getRarityIndex(a.Main_Frame.Rarity_Text.Text) < getRarityIndex(b.Main_Frame.Rarity_Text.Text);
+	end);
+	return items;
+end;
+function addShecklesEspBackpack(state)
+	local fruits = getFruitsBackpack();
+	for i, v in pairs(fruits) do
+		if not v:FindFirstChild("OriginalName") then
+			local originalName = Instance.new("StringValue");
+			originalName.Name = "OriginalName";
+			originalName.Value = v.Name;
+			originalName.Parent = v;
+		end;
+		if state then
+			v.Name = formatMoney(ServerCalculatePlantValue(v)) .. " " .. v.OriginalName.Value;
+		else
+			v.Name = v.OriginalName.Value;
+		end;
+	end;
+end;
+function getHarvestTool()
+	local Backpack = (game:GetService("Players")).LocalPlayer.Backpack;
+	for i, v in pairs(Backpack:GetChildren()) do
+		if v:IsA("Tool") and string.find(v.Name, "Harvest Tool") then
+			return v.Name;
+		end;
+	end;
+	return nil;
+end;
+function harvestPlant(target)
+	local toolName = getHarvestTool();
+	if toolName then
+		local harvestTool = (game:GetService("Players")).LocalPlayer.Character:FindFirstChild(toolName);
+		if not harvestTool then
+			equipTool(toolName);
+		end;
+	end;
+	(RemoteEvents:WaitForChild("HarvestRemote")):InvokeServer(harvestTool, target);
+end;
+function filterUnique(tbl)
+	local result = {};
+	local lookup = {};
+	for _, value in pairs(tbl) do
+		if not lookup[value] then
+			table.insert(result, value);
+			lookup[value] = true;
+		end;
+	end;
+	return result;
+end;
+function getBackpackByName(name)
+	for i, v in pairs(getAllBackpack()) do
+		if string.find(v.Name, name) or v.Name == name then
+			return v;
+		end;
+	end;
+	return nil;
+end;
+function getCharacter()
+	local character = (game:GetService("Players")).LocalPlayer.Character;
+	local result = {};
+	for i, v in pairs(character:GetChildren()) do
+		table.insert(result, v);
+	end;
+	return result;
+end;
+function Plant(pos, plant)
+	(RemoteEvents:WaitForChild("Plant_RE")):FireServer(pos, plant);
+end;
+function WateringCan(target)
+	local tool = getBackpackByName("Watering Can");
+	if tool then
+		if not game.Players.LocalPlayer.Character:FindFirstChild(tool.Name) then
+			equipTool(tool.Name);
+		end;
+	end;
+	(RemoteEvents:WaitForChild("Water_RE")):FireServer(target);
+end;
+function getItemCharacter(item)
+	for i, v in pairs(getCharacter()) do
+		if string.find(v.Name, item) then
+			return v;
+		end;
+	end;
+	return nil;
+end;
+function TrowelPlant(plant, pos)
+	local tool = getBackpackByName("Trowel");
+	(RemoteEvents:WaitForChild("TrowelRemote")):InvokeServer("Pickup", tool, plant);
+	(RemoteEvents:WaitForChild("TrowelRemote")):InvokeServer("Place", tool, plant, pos);
+end;
+function getSeedPacksBackpack()
+	local Backpack = (game:GetService("Players")).LocalPlayer.Backpack;
+	local result = {};
+	for i, v in pairs(Backpack:GetChildren()) do
+		if v.ItemType == "Seed Pack" then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getSprinklersBackpack()
+	local Backpack = (game:GetService("Players")).LocalPlayer.Backpack;
+	local result = {};
+	for i, v in pairs(Backpack:GetChildren()) do
+		if string.find(v.Name, "Sprinkler") then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getSeedsBackpack()
+	local Backpack = (game:GetService("Players")).LocalPlayer.Backpack;
+	local result = {};
+	for i, v in pairs(Backpack:GetChildren()) do
+		if v.Seed then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getFruitsBackpack()
+	local Backpack = (game:GetService("Players")).LocalPlayer.Backpack;
+	local result = {};
+	for i, v in pairs(Backpack:GetChildren()) do
+		if v:FindFirstChild("Item_Seed") then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getFruitName(target)
+	local result = target.Name;
+	return result;
+end;
+function getFruitVariant(target)
+	local result = target.Variant.Value;
+	return result;
+end;
+function getFruitMutations(target, mutation)
+	for i, value in pairs(target:GetAttributes()) do
+		if i == mutation and value then
+			return true;
+		end;
+	end;
+	return false;
+end;
+function getFruitWeight(target)
+	local result = target.Weight.Value;
+	return result;
+end;
+function equipTool(target)
+	if not game.Players.LocalPlayer.Character:FindFirstChild(target) then
+		if game.Players.LocalPlayer.Backpack:FindFirstChild(target) then
+			local Tool = game.Players.LocalPlayer.Backpack:FindFirstChild(target);
+			game.Players.LocalPlayer.Character.Humanoid:EquipTool(Tool);
+		end;
+	end;
+end;
+function getEggStock()
+	local stocks = PetEggStock.Stocks;
+	local result = {};
+	for i, v in pairs(stocks) do
+		table.insert(result, v);
+	end;
+	return result;
+end;
+function getAllSeedShop()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.Seed_Shop.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getAllGearShop()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.Gear_Shop.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getAllHoneyShop()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.HoneyEventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getAllHarvestShop()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.EventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function getAllEventShop()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.EventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+local shopSeed = {};
+task.spawn(function()
+	local sortedByRarity = sortItemsByRarity(getAllSeedShop());
+	for i, v in pairs(sortedByRarity) do
+		table.insert(shopSeed, v.Name);
+	end;
+end);
+local shopGear = {};
+task.spawn(function()
+	local sortedByRarity = sortItemsByRarity(getAllGearShop());
+	for i, v in pairs(sortedByRarity) do
+		table.insert(shopGear, v.Name);
+	end;
+end);
+local shopHarvest = {};
+task.spawn(function()
+	pcall(function()
+		local sortedByRarity = sortItemsByRarity(getAllHarvestShop());
+		for i, v in pairs(sortedByRarity) do
+			table.insert(shopHarvest, v.Name);
+		end;
+	end);
+end);
+local shopZen = {};
+task.spawn(function()
+	pcall(function()
+		local sortedByRarity = sortItemsByRarity(getAllZenShop());
+		for i, v in pairs(sortedByRarity) do
+			table.insert(shopZen, v.Name);
+		end;
+	end);
+end);
+local shopEvent = {};
+task.spawn(function()
+	pcall(function()
+		local sortedByRarity = sortItemsByRarity(getAllEventShop());
+		for i, v in pairs(sortedByRarity) do
+			table.insert(shopEvent, v.Name);
+		end;
+	end);
+end);
+local allEggStock = {};
+task.spawn(function()
+	pcall(function()
+		local eggStock = getEggStock();
+		for i, v in pairs(eggStock) do
+			table.insert(allEggStock, v.EggName);
+		end;
+	end);
+end);
+local shopCosmeticCrate = {};
+task.spawn(function()
+	pcall(function()
+		local cosmeticCrateStock = getCrateCosmeticShop();
+		for i, v in pairs(cosmeticCrateStock) do
+			table.insert(shopCosmeticCrate, v);
+		end;
+	end);
+end);
+local shopCosmeticItem = {};
+task.spawn(function()
+	pcall(function()
+		local cosmeticItemStock = getItemCosmeticShop();
+		for i, v in pairs(cosmeticItemStock) do
+			table.insert(shopCosmeticItem, v);
+		end;
+	end);
+end);
+function getCrateCosmeticShop()
+	local result = {};
+	for i, v in pairs(CosmeticCrateData) do
+		table.insert(result, i);
+	end;
+	return result;
+end;
+function getItemCosmeticShop()
+	local result = {};
+	for i, v in pairs(CosmeticItemData) do
+		table.insert(result, i);
+	end;
+	return result;
+end;
+function getSeedStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.Seed_Shop.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getGearStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.Gear_Shop.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getHoneyShopStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.HoneyEventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.TEXT.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getHarvestShopStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.EventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.TEXT.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getZenShopStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.EventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.TEXT.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getEventShopStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.EventShop_UI.Frame.ScrollingFrame;
+	local result = {};
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.TEXT.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getCosmeticCrateShopStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.CosmeticShop_UI.CosmeticShop.Main.Holder.Shop.ContentFrame;
+	local result = {};
+	for i, segment in pairs(frame:GetChildren()) do
+		if #segment:GetChildren() > 0 then
+			for _, item in pairs(segment:GetChildren()) do
+				if #item:GetChildren() > 0 then
+					if string.find(item.Name, "Crate") and item.Main.SHECKLES_BUY_FRAME.SHECKLES_BUY_BUTTON.SHECKLES_BUY_TEXT.Text ~= "NO STOCK" then
+						table.insert(result, item);
+					end;
+				end;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getTravelingMerchantShopStock()
+	local result = {};
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.TravelingMerchantShop_UI.Frame.ScrollingFrame;
+	for i, v in pairs(frame:GetChildren()) do
+		if #v:GetChildren() > 0 then
+			if v.Main_Frame.Cost_Text.TEXT.Text ~= "NO STOCK" then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getCosmeticItemShopStock()
+	local frame = (game:GetService("Players")).LocalPlayer.PlayerGui.CosmeticShop_UI.CosmeticShop.Main.Holder.Shop.ContentFrame;
+	local result = {};
+	for i, segment in pairs(frame:GetChildren()) do
+		if #segment:GetChildren() > 0 then
+			for _, item in pairs(segment:GetChildren()) do
+				if #item:GetChildren() > 0 then
+					if not string.find(item.Name, "Crate") and item.Main.SHECKLES_BUY_FRAME.SHECKLES_BUY_BUTTON.SHECKLES_BUY_TEXT.Text ~= "NO STOCK" then
+						table.insert(result, item);
+					end;
+				end;
+			end;
+		end;
+	end;
+	return result;
+end;
+function filterFruitsByName(fruits, listName)
+	local result = {};
+	for _, name in pairs(listName) do
+		for i, v in pairs(fruits) do
+			if v.Name == name then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function filterFruitsByVariant(variants, listVariant)
+	local result = {};
+	for _, name in pairs(listVariant) do
+		for i, v in pairs(variants) do
+			if getFruitVariant(v) == name then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function filterFruitsByMutation(mutations, listMutation)
+	local result = {};
+	for _, name in pairs(listMutation) do
+		for i, v in pairs(mutations) do
+			if getFruitMutations(v, name) then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function filterFruitsBlacklistByName(fruits, listName)
+	local result = {};
+	for _, name in pairs(listName) do
+		for i, v in pairs(fruits) do
+			if v.Name ~= name then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function filterFruitsBlacklistByVariant(variants, listVariant)
+	local result = {};
+	for _, name in pairs(listVariant) do
+		for i, v in pairs(variants) do
+			if getFruitVariant(v) ~= name then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function filterFruitsBlacklistByMutation(mutations, listMutation)
+	local result = {};
+	for _, name in pairs(listMutation) do
+		for i, v in pairs(mutations) do
+			if not getFruitMutations(v, name) then
+				table.insert(result, v);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getRandomPosPlant(part)
+	local size = part.Size;
+	local pos = part.Position;
+	local randomX = math.random() * size.X - size.X / 2;
+	local randomZ = math.random() * size.Z - size.Z / 2;
+	local result = CFrame.new(pos.X + randomX, 0.13552704453468323, pos.Z + randomZ);
+	return result;
+end;
+local SummerFruits = {
+	"Carrot",
+	"Strawberry",
+	"Blueberry",
+	"Tomato",
+	"Watermelon",
+	"Cauliflower",
+	"Avocado",
+	"Banana",
+	"Green Apple",
+	"Prickly Pear",
+	"Kiwi",
+	"Pineapple",
+	"Bell Pepper",
+	"Feijoa",
+	"Loquat",
+	"Sugar Apple",
+	"Wild Carrot",
+	"Pear",
+	"Cantaloupe",
+	"Parasol Flower",
+	"Rosy Delight",
+	"Elephant Ears"
+};
+local MutationsNames = MutationHandler.MutationNames;
+local mutationList = {};
+task.spawn(function()
+	for i, v in pairs(MutationsNames) do
+		table.insert(mutationList, i);
+	end;
+end);
+local eggList = {};
+task.spawn(function()
+	for i, v in pairs(EggDataModule) do
+		table.insert(eggList, i);
+	end;
+end);
+local variantList = {
+	"Normal",
+	"Gold",
+	"Rainbow"
+};
+GetMutationsFunction = MutationHandler.GetMutations;
+function getHasMutation(target)
+	local result = {};
+	for i, value in pairs(target:GetAttributes()) do
+		for _, mutation in pairs(mutationList) do
+			if i == mutation and value then
+				table.insert(result, mutation);
+			end;
+		end;
+	end;
+	return result;
+end;
+function getHasAttribute(obj, att)
+	for i, v in pairs(obj:GetAttributes()) do
+		if i == att then
+			return true;
+		end;
+	end;
+	return false;
+end;
+function honeyMachineInteract()
+	(RemoteEvents:WaitForChild("HoneyMachineService_RE")):FireServer("MachineInteract");
+end;
+function dinoMachineInteract()
+	(RemoteEvents:WaitForChild("DinoMachineService_RE")):FireServer("MachineInteract");
+end;
+function ClaimDinoReward()
+	(RemoteEvents:WaitForChild("DinoMachineService_RE")):FireServer("ClaimReward");
+end;
+function submitSummerPlant()
+	(RemoteEvents:WaitForChild("SummerHarvestRemoteEvent")):FireServer("SubmitHeldPlant");
+end;
+function submitZenAuraSinglePlant()
+	(RemoteEvents:WaitForChild("ZenAuraRemoteEvent")):FireServer("SubmitHeldPlant");
+end;
+function submitZenAuraAllPlant()
+	(RemoteEvents:WaitForChild("ZenAuraRemoteEvent")):FireServer("SubmitAllPlants");
+end;
+function submitZenQuestSinglePlant()
+	(RemoteEvents:WaitForChild("ZenQuestRemoteEvent")):FireServer("SubmitHeldPlant");
+end;
+function submitZenQuestAllPlant()
+	(RemoteEvents:WaitForChild("ZenQuestRemoteEvent")):FireServer("SubmitAllPlants");
+end;
+function buyEventShopStock(name)
+	(RemoteEvents:WaitForChild("BuyEventShopStock")):FireServer(name);
+end;
+function OpenEgg(egg)
+	(RemoteEvents:WaitForChild("PetEggService")):FireServer("HatchPet", egg);
+end;
+function checkHoneyCombpressor(value)
+	local status = workspace.HoneyCombpressor.Sign.SurfaceGui.TextLabel.Text;
+	if string.find(status, value) then
+		return true;
+	end;
+	return false;
+end;
+function checkDinoMachine(value)
+	if string.find(getDinoMachineStatus(), value) then
+		return true;
+	end;
+	return false;
+end;
+function getDinoMachineStatus()
+	local result;
+	for _, part in ipairs(workspace.DinoEvent.BenchRewardPart:GetChildren()) do
+		if part:IsA("BasePart") and #part:GetChildren() > 0 then
+			local billboard = (part:FindFirstChild("BillboardPart")):FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("DnaMachineLabel") then
+				result = billboard.DnaMachineLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getDinoMachineUpgradeStatus()
+	local result;
+	for _, part in ipairs(workspace.Interaction.UpdateItems.UpgradePlatform:GetChildren()) do
+		if part:IsA("BasePart") and #part:GetChildren() > 0 then
+			local billboard = (part:FindFirstChild("BillboardPart")):FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("UpgradeLabel") then
+				result = billboard.UpgradeLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getZenChannellerStatus()
+	local result;
+	for _, part in ipairs(workspace.Interaction.UpdateItems.ZenEvent.Decor:GetChildren()) do
+		if part:FindFirstChild("Zen Platform") and #part:GetChildren() > 0 then
+			local billboard = (part["Zen Platform"]:FindFirstChild("BillboardPart")):FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("UpgradeBar") then
+				result = billboard.UpgradeBar.ProgressionLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getMutationPetTimer()
+	local result;
+	for _, part in ipairs(workspace.Interaction.UpdateItems.NewPetStand.PetMutationMachine.Model:GetChildren()) do
+		if part:IsA("BasePart") and #part:GetChildren() > 0 and part:FindFirstChild("BillboardPart") then
+			local billboard = (part:FindFirstChild("BillboardPart")):FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("TimerTextLabel") then
+				result = billboard.TimerTextLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+local summerHarvestRewardList = {};
+SummerHarvestRewardModule = require(ReplicatedStorage.Data.SummerHarvestRewardData);
+task.spawn(function()
+	for i, v in pairs(SummerHarvestRewardModule) do
+		table.insert(summerHarvestRewardList, v.ItemName);
+	end;
+end);
+function getSummerHarvestTimer()
+	local result;
+	for _, part in ipairs(workspace.SummerHarvestEvent.Sign:GetChildren()) do
+		if part:IsA("BasePart") then
+			local billboard = part:FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("Timer") then
+				result = billboard.Timer.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getLabelSummerHarvest()
+	local result;
+	for _, part in ipairs(workspace.SummerHarvestEvent.Sign:GetChildren()) do
+		if part:IsA("BasePart") then
+			local billboard = part:FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("TextLabel") then
+				result = billboard.TextLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getLabelPointSummerHarvest()
+	local result;
+	for _, part in ipairs(workspace.SummerHarvestEvent.RewardSign:GetChildren()) do
+		if part:IsA("BasePart") then
+			local billboard = part:FindFirstChild("SurfaceGui");
+			if billboard and billboard:FindFirstChild("PointTextLabel") then
+				result = billboard.PointTextLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function getLabelRewardSummerHarvest()
+	local result;
+	for _, part in ipairs(workspace.SummerHarvestEvent.RewardSign:GetChildren()) do
+		if part:IsA("BasePart") then
+			local billboard = part:FindFirstChild("SurfaceGui");
+			if billboard and billboard:FindFirstChild("RewardTextLabel") then
+				result = billboard.RewardTextLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	return result;
+end;
+function isTimeSummerHarvest()
+	local result;
+	for _, part in ipairs(workspace.SummerHarvestEvent.Sign:GetChildren()) do
+		if part:IsA("BasePart") then
+			local billboard = part:FindFirstChild("BillboardGui");
+			if billboard and billboard:FindFirstChild("TextLabel") then
+				result = billboard.TextLabel.Text;
+				break;
+			end;
+		end;
+	end;
+	if not string.find(result, "Next Summer Harvest") then
+		return true;
+	end;
+	return false;
+end;
+function getPetStandResetTimer()
+	local result = game.workspace.NPCS["Pet Stand"].Timer.SurfaceGui.ResetTimeLabel.Text;
+	return result;
+end;
+function getGearResetTimer()
+	local result = (game:GetService("Players")).LocalPlayer.PlayerGui.Gear_Shop.Frame.Frame.Timer.Text;
+	return result;
+end;
+function getSeedResetTimer()
+	local result = (game:GetService("Players")).LocalPlayer.PlayerGui.Seed_Shop.Frame.Frame.Timer.Text;
+	return result;
+end;
+function getHarvestShopResetTimer()
+	local result = (game:GetService("Players")).LocalPlayer.PlayerGui.EventShop_UI.Frame.Frame.Timer.Text;
+	return result;
+end;
+function getCosmeticShopResetTimer()
+	local result = (game:GetService("Players")).LocalPlayer.PlayerGui.CosmeticShop_UI.CosmeticShop.Main.Holder.Header.TimerLabel.Text;
+	return result;
+end;
+function sellItem()
+	(RemoteEvents:WaitForChild("Sell_Item")):FireServer();
+end;
+function sellPet(pet)
+	(((game:GetService("ReplicatedStorage")):WaitForChild("GameEvents")):WaitForChild("SellPet_RE")):FireServer(pet);
+end;
+function getPetsBackpack()
+	local result = {};
+	for i, v in pairs(getAllBackpack()) do
+		if v:GetAttribute("ItemType") == "Pet" then
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+local petsBackpackList = {};
+task.spawn(function()
+	for i, v in pairs(getPetsBackpack()) do
+		table.insert(petsBackpackList, v.Name);
+	end;
+end);
+function sellInventory()
+	(RemoteEvents:WaitForChild("Sell_Inventory")):FireServer();
+end;
+function buySeedStock(seedName)
+	(RemoteEvents:WaitForChild("BuySeedStock")):FireServer(seedName);
+end;
+function buyGearStock(gearName)
+	(RemoteEvents:WaitForChild("BuyGearStock")):FireServer(gearName);
+end;
+function buyPetEgg(index)
+	(RemoteEvents:WaitForChild("BuyPetEgg")):FireServer(index);
+end;
+function buyCosmeticItem(name)
+	(RemoteEvents:WaitForChild("BuyCosmeticItem")):FireServer(name);
+end;
+function buyCosmeticCrate(name)
+	(RemoteEvents:WaitForChild("BuyCosmeticCrate")):FireServer(name);
+end;
+function ReclaimPlant(plant)
+	local tool = getBackpackByName("Reclaimer");
+	if tool and (not (game:GetService("Players")).LocalPlayer.Character:FindFirstChild(tool.Name)) then
+		equipTool(tool.Name);
+	end;
+	(RemoteEvents:WaitForChild("ReclaimerService_RE")):FireServer("TryReclaim", plant);
+end;
+function RemoveItem(plant)
+	local tool = getBackpackByName("Shovel");
+	if tool and (not (game:GetService("Players")).LocalPlayer.Character:FindFirstChild(tool.Name)) then
+		equipTool(tool.Name);
+	end;
+	(RemoteEvents:WaitForChild("Remove_Item")):FireServer(plant);
+end;
+function RemoveObject(object)
+	local tool = getBackpackByName("Shovel");
+	if tool and (not (game:GetService("Players")).LocalPlayer.Character:FindFirstChild(tool.Name)) then
+		equipTool(tool.Name);
+	end;
+	(RemoteEvents:WaitForChild("DeleteObject")):FireServer(object);
+end;
+function buyTravelingMerchant(name)
+	(RemoteEvents:WaitForChild("BuyTravelingMerchantShopStock")):FireServer(name);
+end;
+function FavoriteFruit(fruit)
+	local tool = getBackpackByName("Favorite Tool");
+	(RemoteEvents:WaitForChild("FavoriteToolRemote")):InvokeServer(tool, fruit, true);
+end;
+function UnFavoriteFruit(fruit)
+	local tool = getBackpackByName("Favorite Tool");
+	(RemoteEvents:WaitForChild("FavoriteToolRemote")):InvokeServer(tool, fruit, false);
+end;
+function moveTo(target)
+	local player = (game:GetService("Players")).LocalPlayer;
+	local character = player.Character;
+	local hrp = character and character:WaitForChild("HumanoidRootPart");
+	if hrp then
+		if typeof(target) == "CFrame" then
+			hrp.CFrame = target;
+		elseif typeof(target) == "Vector3" then
+			hrp.CFrame = CFrame.new(target);
+		end;
+	end;
+end;
+function getOwrnerFarm()
+	for i, v in pairs((game:GetService("Workspace")).Farm:GetChildren()) do
+		if v.Important.Data.Owner.Value == game.Players.LocalPlayer.Name then
+			return v;
+		end;
+	end;
+end;
+function getAllFarm()
+	local res = {};
+	for i, v in pairs((game:GetService("Workspace")).Farm:GetChildren()) do
+		table.insert(res, v);
+	end;
+	return res;
+end;
+function getMiddlePosFarm()
+	local totalPos = Vector3.new(0, 0, 0);
+	local count = 0;
+	for i, v in pairs((getOwrnerFarm()).Important.Plant_Locations:GetChildren()) do
+		if v:IsA("BasePart") then
+			totalPos += v.Position;
+			count += 1;
+		end;
+	end;
+	local middlePos;
+	if count > 0 then
+		middlePos = totalPos / count;
+	end;
+	return middlePos;
+end;
+function refactorFruits(plants)
+	local result = {};
+	for i, v in pairs(plants) do
+		if isMultiHarvest(v) then
+			local Fruits = v:FindFirstChild("Fruits");
+			for i, v in pairs(Fruits:GetChildren()) do
+				table.insert(result, v);
+			end;
+		else
+			table.insert(result, v);
+		end;
+	end;
+	return result;
+end;
+function findNotification(name)
+	for i, v in pairs((game:GetService("Players")).LocalPlayer.PlayerGui.Top_Notification.Frame:GetChildren()) do
+		if v:FindFirstChild("TextLabel") and string.find(v.TextLabel.Text, name) then
+			return v;
+		end;
+	end;
+end;
+function destroyNotification(name)
+	(findNotification(name)):Destroy();
+end;
+function CollectFruit(fruit)
+	if InventoryModule.IsMaxInventory() then
+		return;
+	end;
+	((RemoteEvents:WaitForChild("Crops")):WaitForChild("Collect")):FireServer({
+		fruit
+	});
+end;
+function getAllPlantsGarden()
+	local plants = {};
+	for i, v in pairs((getOwrnerFarm()).Important.Plants_Physical:GetChildren()) do
+		table.insert(plants, v);
+	end;
+	return plants;
+end;
+local plantList = {};
+task.spawn(function()
+	for i, v in pairs(getAllPlantsGarden()) do
+		table.insert(plantList, v.Name);
+	end;
+end);
+function getAllPlantsServer()
+	local plants = {};
+	for _, farm in pairs(getAllFarm()) do
+		for i, v in pairs(farm.Important.Plants_Physical:GetChildren()) do
+			table.insert(plants, v);
+		end;
+	end;
+	return plants;
+end;
+function getAllFruitsServer()
+	return refactorFruits(getAllPlantsServer());
+end;
+function getAllFruitsGarden()
+	return refactorFruits(getAllPlantsGarden());
+end;
+function findCollectPrompt(obj)
+	return obj:FindFirstChild("ProximityPrompt", true);
+end;
+function collectFruits(prompt)
+	if not prompt then
+		return;
+	end;
+	fireproximityprompt(prompt);
+end;
+DiscordServerSection = Tabs.InfoTab:Section({
+	Title = "Discord Server",
+	TextXAlignment = "Left"
+});
+local InviteCode = "dGd8gsSqGp";
+DiscordLinkButton = Tabs.InfoTab:Button({
+	Title = "Join Discord Server",
+	Callback = function()
+		setclipboard("https://discord.gg/" .. InviteCode);
+	end
+});
+Tabs.InfoTab:Divider();
+GameTimeParagraph = Tabs.InfoTab:Paragraph({
+	Title = "Game Time",
+	Desc = "0",
+	Image = "timer",
+	ImageSize = 20
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			local GameTime = math.floor(workspace.DistributedGameTime + 0.5);
+			local Hour = math.floor(GameTime / 60 ^ 2) % 24;
+			local Minute = math.floor(GameTime / 60 ^ 1) % 60;
+			local Second = math.floor(GameTime / 60 ^ 0) % 60;
+			GameTimeParagraph:SetDesc(Hour .. " Hours " .. Minute .. " Minute " .. Second .. " Second");
+		end);
+	end;
+end);
+FpsParagraph = Tabs.InfoTab:Paragraph({
+	Title = "Fps",
+	Desc = "0",
+	Image = "monitor",
+	ImageSize = 20
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			FpsParagraph:SetDesc(workspace:GetRealPhysicsFPS());
+		end);
+	end;
+end);
+PingParagraph = Tabs.InfoTab:Paragraph({
+	Title = "Ping",
+	Desc = "0",
+	Image = "signal",
+	ImageSize = 20
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			PingParagraph:SetDesc((game:GetService("Stats")).Network.ServerStatsItem["Data Ping"]:GetValueString());
+		end);
+	end;
+end);
+PlantSection = Tabs.MainTab:Section({
+	Title = "Plant",
+	TextXAlignment = "Left"
+});
+local plantMethodList = {
+	"Character",
+	"Random"
+};
+SelectedPlantMethodDropdown = Tabs.MainTab:Dropdown({
+	Title = "Select Plant Method",
+	Values = plantMethodList,
+	Value = plantMethodList[2],
+	Multi = false,
+	Callback = function(state)
+		_G.SelectedPlantMethod = state;
+	end
+});
+Config:Register("SelectedPlantMethodDropdown", SelectedPlantMethodDropdown);
+AutoPlantToggle = Tabs.MainTab:Toggle({
+	Title = "Auto Plant",
+	Desc = "Auto plant held seed",
+	Default = false,
+	Callback = function(state)
+		_G.AutoPlant = state;
+	end
+});
+Config:Register("AutoPlantToggle", AutoPlantToggle);
+function getHeldPlant()
+	local char = (game:GetService("Players")).LocalPlayer.Character;
+	for i, v in pairs(allPlants) do
+		for _, held in pairs(char:GetChildren()) do
+			if string.find(held.Name, v) then
+				return v;
+			end;
+		end;
+	end;
+	return nil;
+end;
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			if _G.AutoPlant then
+				if _G.SelectedPlantMethod == "Character" then
+					if getHeldPlant() then
+						Plant((game:GetService("Players")).LocalPlayer.Character.HumanoidRootPart.Position, getHeldPlant());
+						wait(0.5);
+					end;
+				elseif _G.SelectedPlantMethod == "Random" then
+					for i, v in pairs((getOwrnerFarm()).Important.Plant_Locations:GetChildren()) do
+						if getHeldPlant() then
+							Plant((getRandomPosPlant(v)).Position, getHeldPlant());
+							wait(0.5);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.MainTab:Divider();
+SellFruitsSection = Tabs.MainTab:Section({
+	Title = "Sell Fruits",
+	TextXAlignment = "Left"
+});
+AutoSellDelay = Tabs.MainTab:Slider({
+	Title = "Auto Sell Delay /sec",
+	Step = 1,
+	Value = {
+		Min = 10,
+		Max = 60,
+		Default = 20
+	},
+	Callback = function(value)
+		_G.AutoSellDelay = value;
+	end
+});
+Config:Register("AutoSellDelay", AutoSellDelay);
+AutoSellInventoryToggle = Tabs.MainTab:Toggle({
+	Title = "Auto Sell Inventory",
+	Default = false,
+	Callback = function(state)
+		_G.AutoSellAllInventory = state;
+	end
+});
+Config:Register("AutoSellInventoryToggle", AutoSellInventoryToggle);
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			if _G.AutoSellAllInventory then
+				local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+				moveTo(CFrame.new(86.57784271240234, 2.999999761581421, 0.42679983377456665));
+				task.wait(0.5);
+				sellInventory();
+				task.wait(0.5);
+				moveTo(oldPos);
+			end;
+			task.wait(_G.AutoSellDelay);
+		end);
+	end;
+end);
+AutoSellWhenBackpackIsFullToggle = Tabs.MainTab:Toggle({
+	Title = "When Backpack is Full",
+	Desc = "Auto sell when backpack is full",
+	Default = false,
+	Callback = function(state)
+		_G.AutoSellAllWhenBackpackIsFull = state;
+	end
+});
+Config:Register("AutoSellWhenBackpackIsFullToggle", AutoSellWhenBackpackIsFullToggle);
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			if _G.AutoSellAllWhenBackpackIsFull then
+				if InventoryModule.IsMaxInventory() then
+					local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+					moveTo(CFrame.new(86.57784271240234, 2.999999761581421, 0.42679983377456665));
+					task.wait(0.5);
+					sellInventory();
+					task.wait(0.5);
+					moveTo(oldPos);
+				end;
+			end;
+		end);
+	end;
+end);
+SellHeldItemButton = Tabs.MainTab:Button({
+	Title = "Sell Held Item",
+	Desc = "Sell held item",
+	Callback = function()
+		local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+		moveTo(CFrame.new(86.57784271240234, 2.999999761581421, 0.42679983377456665));
+		task.wait(0.5);
+		sellItem();
+		task.wait(0.5);
+		moveTo(oldPos);
+	end
+});
+SellInventoryButton = Tabs.MainTab:Button({
+	Title = "Sell Inventory",
+	Desc = "Sell all inventory",
+	Callback = function()
+		local oldPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;
+		moveTo(CFrame.new(86.57784271240234, 2.999999761581421, 0.42679983377456665));
+		task.wait(0.5);
+		sellInventory();
+		task.wait(0.5);
+		moveTo(oldPos);
+	end
+});
+Tabs.MainTab:Divider();
+AutoBuySeedSection = Tabs.MainTab:Section({
+	Title = "Auto Collect Fruits",
+	TextXAlignment = "Left"
+});
+AutoCollectAllToggle = Tabs.MainTab:Toggle({
+	Title = "Auto Collect All",
+	Desc = "Auto collect all fruits",
+	Default = false,
+	Callback = function(state)
+		_G.AutoCollectAll = state;
+	end
+});
+Config:Register("AutoCollectAllToggle", AutoCollectAllToggle);
+Tabs.MainTab:Divider();
+WhitelistFruitDropdown = Tabs.MainTab:Dropdown({
+	Title = "Whitelist Fruit",
+	Values = allPlants,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.WhitelistFruit = option;
+		end);
+	end
+});
+Config:Register("WhitelistFruitDropdown", WhitelistFruitDropdown);
+WhitelistMutationDropdown = Tabs.MainTab:Dropdown({
+	Title = "Whitelist Mutation",
+	Values = mutationList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.WhitelistMutation = option;
+		end);
+	end
+});
+Config:Register("WhitelistMutationDropdown", WhitelistMutationDropdown);
+WhitelistVariantDropdown = Tabs.MainTab:Dropdown({
+	Title = "Whitelist Variant",
+	Values = variantList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.WhitelistVariant = option;
+		end);
+	end
+});
+Config:Register("WhitelistVariantDropdown", WhitelistVariantDropdown);
+AutoCollectWhitelistToggle = Tabs.MainTab:Toggle({
+	Title = "Auto Collect Whitelist",
+	Desc = "Auto collect whitelisted fruits",
+	Default = false,
+	Callback = function(state)
+		pcall(function()
+			_G.AutoCollectWhitelist = state;
+		end);
+	end
+});
+Config:Register("AutoCollectWhitelistToggle", AutoCollectWhitelistToggle);
+Tabs.MainTab:Divider();
+BlacklistFruitDropdown = Tabs.MainTab:Dropdown({
+	Title = "Blacklist Fruit",
+	Values = allPlants,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.BlacklistFruit = option;
+		end);
+	end
+});
+Config:Register("BlacklistFruitDropdown", BlacklistFruitDropdown);
+BlacklistMutationDropdown = Tabs.MainTab:Dropdown({
+	Title = "Blacklist Mutation",
+	Values = mutationList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.BlacklistMutation = option;
+		end);
+	end
+});
+BlacklistVariantDropdown = Tabs.MainTab:Dropdown({
+	Title = "Blacklist Variant",
+	Values = variantList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.BlacklistVariant = option;
+		end);
+	end
+});
+Config:Register("BlacklistVariantDropdown", BlacklistVariantDropdown);
+AutoCollectBlacklistToggle = Tabs.MainTab:Toggle({
+	Title = "Auto Collect Blacklist",
+	Desc = "Auto collect blacklisted fruits",
+	Default = false,
+	Callback = function(state)
+		_G.AutoCollectBlacklist = state;
+	end
+});
+Config:Register("AutoCollectBlacklistToggle", AutoCollectBlacklistToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoCollectWhitelist then
+				local WhitelistFruit = _G.WhitelistFruit or {};
+				local WhitelistMutation = _G.WhitelistMutation or {};
+				local WhitelistVariant = _G.WhitelistVariant or {};
+				local fruits = getAllFruitsGarden();
+				local result = fruits;
+				if #WhitelistFruit > 0 then
+					result = filterFruitsByName(result, WhitelistFruit);
+				end;
+				if #WhitelistMutation > 0 then
+					result = filterFruitsByMutation(result, WhitelistMutation);
+				end;
+				if #WhitelistVariant > 0 then
+					result = filterFruitsByVariant(result, WhitelistVariant);
+				end;
+				for _, fruit in pairs(result) do
+					CollectFruit(fruit);
+					task.wait(0.01);
+				end;
+			end;
+		end);
+	end;
+end);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoCollectBlacklist then
+				local BlacklistFruit = _G.BlacklistFruit or {};
+				local BlacklistMutation = _G.BlacklistMutation or {};
+				local BlacklistVariant = _G.BlacklistVariant or {};
+				local fruits = getAllFruitsGarden();
+				local result = fruits;
+				if #BlacklistFruit > 0 then
+					result = filterFruitsBlacklistByName(result, BlacklistFruit);
+				end;
+				if #BlacklistMutation > 0 then
+					result = filterFruitsBlacklistByMutation(result, BlacklistMutation);
+				end;
+				if #BlacklistVariant > 0 then
+					result = filterFruitsBlacklistByVariant(result, BlacklistVariant);
+				end;
+				for _, fruit in pairs(result) do
+					CollectFruit(fruit);
+					task.wait(0.01);
+				end;
+			end;
+		end);
+	end;
+end);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoCollectAll then
+				local fruits = getAllFruitsGarden();
+				for i, v in pairs(fruits) do
+					CollectFruit(v);
+					task.wait(0.01);
+				end;
+			end;
+		end);
+	end;
+end);
+BuySeedSection = Tabs.ShopTab:Section({
+	Title = "Buy Seed",
+	TextXAlignment = "Left"
+});
+SelectedSeedDropdown = Tabs.ShopTab:Dropdown({
+	Title = "Select Seed",
+	Values = shopSeed,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedSeed = option;
+		end);
+	end
+});
+Config:Register("SelectedSeedDropdown", SelectedSeedDropdown);
+AutoBuySeedToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy Seed",
+	Desc = "Auto buy selected seed",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuySeed = state;
+	end
+});
+Config:Register("AutoBuySeedToggle", AutoBuySeedToggle);
+function checkAvailable(table, name)
+	for _, v in pairs(table) do
+		if v.Name and v.Name == name or v == name then
+			return true;
+		end;
+	end;
+	return false;
+end;
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuySeed then
+				local selectedSeed = _G.SelectedSeed;
+				local seedStock = getSeedStock();
+				if #seedStock > 0 then
+					for i, v in pairs(seedStock) do
+						if checkAvailable(selectedSeed, v.Name) then
+							buySeedStock(v.Name);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+AutoBuyAllSeedToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy All Seed",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyAllSeed = state;
+	end
+});
+Config:Register("AutoBuyAllSeedToggle", AutoBuyAllSeedToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyAllSeed then
+				local seedStock = getSeedStock();
+				if #seedStock > 0 then
+					for i, v in pairs(seedStock) do
+						buySeedStock(v.Name);
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.ShopTab:Divider();
+BuyGearSection = Tabs.ShopTab:Section({
+	Title = "Buy Gear",
+	TextXAlignment = "Left"
+});
+SelectedGearDropdown = Tabs.ShopTab:Dropdown({
+	Title = "Select Gear",
+	Values = shopGear,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedGear = option;
+		end);
+	end
+});
+Config:Register("SelectedGearDropdown", SelectedGearDropdown);
+AutoBuyGearToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy Gear",
+	Desc = "Auto buy selected gear",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyGear = state;
+	end
+});
+Config:Register("AutoBuyGearToggle", AutoBuyGearToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyGear then
+				local selectedGear = _G.SelectedGear;
+				local gearStock = getGearStock();
+				if #gearStock > 0 then
+					for i, v in pairs(gearStock) do
+						if checkAvailable(selectedGear, v.Name) then
+							buyGearStock(v.Name);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+AutoBuyAllGearToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy All Gear",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyAllGear = state;
+	end
+});
+Config:Register("AutoBuyAllGearToggle", AutoBuyAllGearToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyAllGear then
+				local gearStock = getGearStock();
+				if #gearStock > 0 then
+					for i, v in pairs(gearStock) do
+						buyGearStock(v.Name);
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.ShopTab:Divider();
+BuyTravelingMerchantSection = Tabs.ShopTab:Section({
+	Title = "Buy Traveling Merchant",
+	TextXAlignment = "Left"
+});
+SelectedTravelingMerchantDropdown = Tabs.ShopTab:Dropdown({
+	Title = "Select Traveling Merchant",
+	Values = getTravelingMerchantData(),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedTravelingMerchant = option;
+		end);
+	end
+});
+Config:Register("SelectedTravelingMerchantDropdown", SelectedTravelingMerchantDropdown);
+AutoBuyTravelingMerchantToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy Traveling Merchant",
+	Desc = "Auto buy selected traveling merchant",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyTravelingMerchant = state;
+	end
+});
+Config:Register("AutoBuyTravelingMerchantToggle", AutoBuyTravelingMerchantToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyTravelingMerchant then
+				local selectedTravelingMerchant = _G.SelectedTravelingMerchant;
+				local travelingMerchantStock = getTravelingMerchantShopStock();
+				if #travelingMerchantStock > 0 then
+					for i, v in pairs(travelingMerchantStock) do
+						if checkAvailable(selectedTravelingMerchant, v.Name) then
+							buyTravelingMerchant(v.Name);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.ShopTab:Divider();
+BuyCosmeticSection = Tabs.ShopTab:Section({
+	Title = "Buy Cosmetic",
+	TextXAlignment = "Left"
+});
+SelectedCosmeticCrateDropdown = Tabs.ShopTab:Dropdown({
+	Title = "Select Cosmetic Crate",
+	Values = getCrateCosmeticShop(),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedCosmeticCrate = option;
+		end);
+	end
+});
+Config:Register("SelectedCosmeticCrateDropdown", SelectedCosmeticCrateDropdown);
+AutoBuyCosmeticCrateToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy Cosmetic Crate",
+	Desc = "Auto buy selected cosmetic crate",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyCosmeticCrate = state;
+	end
+});
+Config:Register("AutoBuyCosmeticCrateToggle", AutoBuyCosmeticCrateToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyCosmeticCrate then
+				local selectedCosmeticCrate = _G.SelectedCosmeticCrate;
+				local cosmeticCrateStock = getCosmeticCrateShopStock();
+				if #cosmeticCrateStock > 0 then
+					for i, v in pairs(cosmeticCrateStock) do
+						if checkAvailable(selectedCosmeticCrate, v.Name) then
+							buyCosmeticCrate(v.Name);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+SelectedCosmeticItemDropdown = Tabs.ShopTab:Dropdown({
+	Title = "Select Cosmetic Item",
+	Values = getItemCosmeticShop(),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedCosmeticItem = option;
+		end);
+	end
+});
+Config:Register("SelectedCosmeticItemDropdown", SelectedCosmeticItemDropdown);
+AutoBuyCosmeticItemToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy Cosmetic Item",
+	Desc = "Auto buy selected cosmetic item",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyCosmeticItem = state;
+	end
+});
+Config:Register("AutoBuyCosmeticItemToggle", AutoBuyCosmeticItemToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyCosmeticItem then
+				local selectedCosmeticItem = _G.SelectedCosmeticItem;
+				local cosmeticItemStock = getCosmeticItemShopStock();
+				if #cosmeticItemStock > 0 then
+					for i, v in pairs(cosmeticItemStock) do
+						if checkAvailable(selectedCosmeticItem, v.Name) then
+							buyCosmeticItem(v.Name);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.ShopTab:Divider();
+BuyEggsSection = Tabs.ShopTab:Section({
+	Title = "Buy Egg",
+	TextXAlignment = "Left"
+});
+SelectedEggDropdown = Tabs.ShopTab:Dropdown({
+	Title = "Select Egg",
+	Values = eggList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedEgg = option;
+		end);
+	end
+});
+Config:Register("SelectedEggDropdown", SelectedEggDropdown);
+AutoBuyEggsToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy Egg",
+	Desc = "Auto buy selected egg",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyEgg = state;
+	end
+});
+Config:Register("AutoBuyEggsToggle", AutoBuyEggsToggle);
+AutoBuyAllEggsToggle = Tabs.ShopTab:Toggle({
+	Title = "Auto Buy All Egg",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuyAllEgg = state;
+	end
+});
+Config:Register("AutoBuyAllEggsToggle", AutoBuyAllEggsToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyEgg then
+				local selectedEgg = _G.SelectedEgg;
+				local eggStock = getEggStock();
+				if #eggStock > 0 and #selectedEgg > 0 then
+					for _, eggName in pairs(selectedEgg) do
+						for i, stock in pairs(eggStock) do
+							if stock.EggName == eggName then
+								buyPetEgg(i);
+							end;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuyAllEgg then
+				local eggStock = getEggStock();
+				if #eggStock > 0 then
+					for i, v in pairs(eggStock) do
+						buyPetEgg(i);
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+ShovelFruitSection = Tabs.UtilityTab:Section({
+	Title = "Shovel Fruit",
+	TextXAlignment = "Left"
+});
+SelectedFruitShovelDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Fruits",
+	Values = allPlants,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedFruitShovel = option;
+		end);
+	end
+});
+Config:Register("SelectedFruitShovelDropdown", SelectedFruitShovelDropdown);
+EnterWeightShovelFruitInput = Tabs.UtilityTab:Input({
+	Title = "Enter Weight",
+	Placeholder = "0",
+	Type = "Input",
+	Callback = function(value)
+		if tonumber(value) then
+			_G.WeightShovelFruit = tonumber(value);
+		end;
+	end
+});
+Config:Register("EnterWeightShovelFruitInput", EnterWeightShovelFruitInput);
+AutoShovelFruitToggle = Tabs.UtilityTab:Toggle({
+	Title = "Auto Shovel Fruit",
+	Desc = "Auto removes fruit when the weight is below the target",
+	Default = false,
+	Callback = function(state)
+		_G.AutoShovelFruit = state;
+	end
+});
+Config:Register("AutoShovelFruitToggle", AutoShovelFruitToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoShovelFruit then
+				for i, v in pairs(getAllFruitsGarden()) do
+					for _, selectedPlant in pairs(_G.SelectedFruitShovel) do
+						if v.Name == selectedPlant and getFruitWeight(v) < _G.WeightShovelFruit then
+							RemoveItem(v:WaitForChild("1"));
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+ShovelFruitButton = Tabs.UtilityTab:Button({
+	Title = "Shovel Fruit",
+	Callback = function()
+		for i, v in pairs(getAllFruitsGarden()) do
+			for _, selectedPlant in pairs(_G.SelectedFruitShovel) do
+				if v.Name == selectedPlant and getFruitWeight(v) < _G.WeightShovelFruit then
+					RemoveItem(v:WaitForChild("1"));
+				end;
+			end;
+		end;
+	end
+});
+Tabs.UtilityTab:Divider();
+HarverstSection = Tabs.UtilityTab:Section({
+	Title = "Harverst",
+	TextXAlignment = "Left"
+});
+SelectedPlantHarvestDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Plant",
+	Values = filterUnique(plantList),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPlantHarvest = option;
+		end);
+	end
+});
+Config:Register("SelectedPlantHarvestDropdown", SelectedPlantHarvestDropdown);
+RefreshSelectedPlantHarvestButton = Tabs.UtilityTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local plantList = {};
+		for i, v in pairs(getAllPlantsGarden()) do
+			table.insert(plantList, v.Name);
+		end;
+		SelectedPlantHarvestDropdown:Refresh(filterUnique(plantList));
+	end
+});
+HarvestButton = Tabs.UtilityTab:Button({
+	Title = "Harvest",
+	Desc = "Harvest selected plant",
+	Callback = function()
+		for _, plant in pairs(getAllPlantsGarden()) do
+			for _, selectedName in pairs(_G.SelectedPlantHarvest) do
+				if plant.Name and string.find(plant.Name, selectedName) then
+					harvestPlant(plant);
+				end;
+			end;
+		end;
+	end
+});
+Tabs.UtilityTab:Divider();
+ReclaimPlantSection = Tabs.UtilityTab:Section({
+	Title = "Reclaim Plant",
+	TextXAlignment = "Left"
+});
+SelectedPlantReclaimDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Plants",
+	Values = filterUnique(plantList),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPlantReclaim = option;
+		end);
+	end
+});
+Config:Register("SelectedPlantReclaimDropdown", SelectedPlantReclaimDropdown);
+RefreshSelectedPlantReclaimButton = Tabs.UtilityTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local plantList = {};
+		for i, v in pairs(getAllPlantsGarden()) do
+			table.insert(plantList, v.Name);
+		end;
+		SelectedPlantReclaimDropdown:Refresh(filterUnique(plantList));
+	end
+});
+ReclaimButton = Tabs.UtilityTab:Button({
+	Title = "Reclaim Plant",
+	Desc = "Reclaim selected plant",
+	Callback = function()
+		for i, v in pairs(getAllPlantsGarden()) do
+			for _, selectedPlant in pairs(_G.SelectedPlantReclaim) do
+				if v.Name == selectedPlant then
+					ReclaimPlant(v);
+					break;
+				end;
+			end;
+		end;
+	end
+});
+Tabs.UtilityTab:Divider();
+MovePlantSection = Tabs.UtilityTab:Section({
+	Title = "Move Plant",
+	TextXAlignment = "Left"
+});
+SelectedPlantTrowelDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Plants",
+	Values = filterUnique(plantList),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPlantTrowel = option;
+		end);
+	end
+});
+Config:Register("SelectedPlantTrowelDropdown", SelectedPlantTrowelDropdown);
+RefreshSelectedPlantTrowelButton = Tabs.UtilityTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local plantList = {};
+		for i, v in pairs(getAllPlantsGarden()) do
+			table.insert(plantList, v.Name);
+		end;
+		SelectedPlantTrowelDropdown:Refresh(filterUnique(plantList));
+	end
+});
+MoveButton = Tabs.UtilityTab:Button({
+	Title = "Move Plant",
+	Desc = "Move plants in your position",
+	Callback = function()
+		for i, v in pairs(getAllPlantsGarden()) do
+			for _, selectedPlant in pairs(_G.SelectedPlantTrowel) do
+				if v.Name == selectedPlant then
+					TrowelPlant(v, (game:GetService("Players")).LocalPlayer.Character.HumanoidRootPart.CFrame);
+				end;
+			end;
+		end;
+	end
+});
+Tabs.UtilityTab:Divider();
+RemovePlantSection = Tabs.UtilityTab:Section({
+	Title = "Remove Plant",
+	TextXAlignment = "Left"
+});
+SelectedPlantRemoveDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Plants",
+	Values = filterUnique(plantList),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPlantRemove = option;
+		end);
+	end
+});
+Config:Register("SelectedPlantRemoveDropdown", SelectedPlantRemoveDropdown);
+RefreshSelectedPlantRemoveButton = Tabs.UtilityTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local plantList = {};
+		for i, v in pairs(getAllPlantsGarden()) do
+			table.insert(plantList, v.Name);
+		end;
+		SelectedPlantRemoveDropdown:Refresh(filterUnique(plantList));
+	end
+});
+RemovePlantButton = Tabs.UtilityTab:Button({
+	Title = "Remove Plant",
+	Desc = "Remove your selected plant",
+	Callback = function()
+		for i, v in pairs(getAllPlantsGarden()) do
+			for _, selectedPlant in pairs(_G.SelectedPlantRemove) do
+				if v.Name == selectedPlant then
+					RemoveItem(v:WaitForChild("1"));
+				end;
+			end;
+		end;
+	end
+});
+Tabs.UtilityTab:Divider();
+FavoriteFruitSection = Tabs.UtilityTab:Section({
+	Title = "Favorite Fruit",
+	TextXAlignment = "Left"
+});
+SelectedFruitFavoriteDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Fruits",
+	Values = allPlants,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedFruitFavorite = option;
+		end);
+	end
+});
+Config:Register("SelectedFruitFavoriteDropdown", SelectedFruitFavoriteDropdown);
+SelectedMutationFavoriteDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Mutation",
+	Values = mutationList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedMutationFavorite = option;
+		end);
+	end
+});
+Config:Register("SelectedMutationFavoriteDropdown", SelectedMutationFavoriteDropdown);
+SelectedVariantFavoriteDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Variant",
+	Values = variantList,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedVariantFavorite = option;
+		end);
+	end
+});
+Config:Register("SelectedVariantFavoriteDropdown", SelectedVariantFavoriteDropdown);
+FavoriteButton = Tabs.UtilityTab:Button({
+	Title = "Favorite Fruit",
+	Desc = "Favorite selected fruits",
+	Callback = function()
+		local WhitelistFruit = _G.SelectedFruitFavorite or {};
+		local WhitelistMutation = _G.SelectedMutationFavorite or {};
+		local WhitelistVariant = _G.SelectedVariantFavorite or {};
+		local fruits = getAllFruitsGarden();
+		local result = fruits;
+		if #WhitelistFruit > 0 then
+			result = filterFruitsByName(result, WhitelistFruit);
+		end;
+		if #WhitelistMutation > 0 then
+			result = filterFruitsByMutation(result, WhitelistMutation);
+		end;
+		if #WhitelistVariant > 0 then
+			result = filterFruitsByVariant(result, WhitelistVariant);
+		end;
+		for _, fruit in pairs(result) do
+			FavoriteFruit(fruit);
+		end;
+	end
+});
+UnFavoriteButton = Tabs.UtilityTab:Button({
+	Title = "Unfavorite Fruit",
+	Desc = "Unfavorite selected fruits",
+	Callback = function()
+		local WhitelistFruit = _G.SelectedFruitFavorite or {};
+		local WhitelistMutation = _G.SelectedMutationFavorite or {};
+		local WhitelistVariant = _G.SelectedVariantFavorite or {};
+		local fruits = getAllFruitsGarden();
+		local result = fruits;
+		if #WhitelistFruit > 0 then
+			result = filterFruitsByName(result, WhitelistFruit);
+		end;
+		if #WhitelistMutation > 0 then
+			result = filterFruitsByMutation(result, WhitelistMutation);
+		end;
+		if #WhitelistVariant > 0 then
+			result = filterFruitsByVariant(result, WhitelistVariant);
+		end;
+		for _, fruit in pairs(result) do
+			UnFavoriteFruit(fruit);
+		end;
+	end
+});
+Tabs.UtilityTab:Divider();
+WateringCanSection = Tabs.UtilityTab:Section({
+	Title = "Watering Can",
+	TextXAlignment = "Left"
+});
+SelectedPlantWateringDropdown = Tabs.UtilityTab:Dropdown({
+	Title = "Select Plants",
+	Values = filterUnique(plantList),
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPlantWatering = option;
+		end);
+	end
+});
+Config:Register("SelectedPlantWateringDropdown", SelectedPlantWateringDropdown);
+RefreshSelectedPlantWateringButton = Tabs.UtilityTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local plantList = {};
+		for i, v in pairs(getAllPlantsGarden()) do
+			table.insert(plantList, v.Name);
+		end;
+		SelectedPlantWateringDropdown:Refresh(filterUnique(plantList));
+	end
+});
+AutoWateringCanToggle = Tabs.UtilityTab:Toggle({
+	Title = "Auto Watering Can",
+	Desc = "Watering Plant",
+	Default = false,
+	Callback = function(state)
+		_G.AutoWateringCan = state;
+	end
+});
+Config:Register("AutoWateringCanToggle", AutoWateringCanToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoWateringCan then
+				for i, v in pairs(getAllPlantsGarden()) do
+					for _, selectedPlant in pairs(_G.SelectedPlantWatering) do
+						if v.Name == selectedPlant then
+							WateringCan(Vector3.new(v.WorldPivot.Position.X, 0.111, v.WorldPivot.Position.Z));
+							wait(1);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+WateringButton = Tabs.UtilityTab:Button({
+	Title = "Watering Plant",
+	Callback = function()
+		for i, v in pairs(getAllPlantsGarden()) do
+			for _, selectedPlant in pairs(_G.SelectedPlantWatering) do
+				if v.Name == selectedPlant then
+					WateringCan(Vector3.new(v.WorldPivot.Position.X, 0.111, v.WorldPivot.Position.Z));
+				end;
+			end;
+		end;
+	end
+});
+CraftSection = Tabs.CraftTab:Section({
+	Title = "Craft",
+	TextXAlignment = "Left"
+});
+SelectedSeedCraftDropdown = Tabs.CraftTab:Dropdown({
+	Title = "Select Seed Craft",
+	Values = craftSeedList,
+	Value = nil,
+	Multi = false,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedSeedCraft = option;
+		end);
+	end
+});
+Config:Register("SelectedSeedCraftDropdown", SelectedSeedCraftDropdown);
+AutoSeedCraftToggle = Tabs.CraftTab:Toggle({
+	Title = "Auto Craft",
+	Desc = "Auto Craft Seed",
+	Default = false,
+	Callback = function(state)
+		_G.AutoSeedCraft = state;
+	end
+});
+Config:Register("AutoSeedCraftToggle", AutoSeedCraftToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoSeedCraft then
+				local selectedSeed = _G.SelectedSeedCraft;
+				if checkSeedCraftIsDone() == nil then
+					if checkSeedCraftRecipeId() == nil then
+						setSeedRecipe(selectedSeed);
+					elseif checkSeedCraftRecipeId() == selectedSeed then
+						if isSeedInputCompleated(selectedSeed) == false then
+							for i, input in pairs(getRecipesInput(selectedSeed)) do
+								local found = false;
+								for _, hasInput in pairs(getInputedSeedCraft()) do
+									if input.ItemData.ItemName == hasInput then
+										found = true;
+										break;
+									end;
+								end;
+								if not found then
+									InputSeedCraftItem(input.ItemType, i, getUUIDItemBackpack(input.ItemData.ItemName));
+								end;
+							end;
+						else
+							startCraftSeed();
+						end;
+					else
+						CancelSeedCraft();
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+AutoClaimSeedCraftToggle = Tabs.CraftTab:Toggle({
+	Title = "Auto Claim",
+	Desc = "Auto claim when craft is completed",
+	Default = false,
+	Callback = function(state)
+		_G.AutoClaimSeedCraft = state;
+	end
+});
+Config:Register("AutoClaimSeedCraftToggle", AutoClaimSeedCraftToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoClaimSeedCraft then
+				if checkSeedCraftIsDone() then
+					ClaimSeedCraft();
+				end;
+			end;
+		end);
+	end;
+end);
+SelectedGearCraftDropdown = Tabs.CraftTab:Dropdown({
+	Title = "Select Gear Craft",
+	Values = craftGearList,
+	Value = nil,
+	Multi = false,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedGearCraft = option;
+		end);
+	end
+});
+Config:Register("SelectedGearCraftDropdown", SelectedGearCraftDropdown);
+AutoGearCraftToggle = Tabs.CraftTab:Toggle({
+	Title = "Auto Craft",
+	Desc = "Auto Craft Gear",
+	Default = false,
+	Callback = function(state)
+		_G.AutoGearCraft = state;
+	end
+});
+Config:Register("AutoGearCraftToggle", AutoGearCraftToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoGearCraft then
+				local selectedGear = _G.SelectedGearCraft;
+				if checkGearCraftIsDone() == nil then
+					if checkGearCraftRecipeId() == nil then
+						setGearRecipe(selectedGear);
+					elseif checkGearCraftRecipeId() == selectedGear then
+						if isGearInputCompleated(selectedGear) == false then
+							for i, input in pairs(getRecipesInput(selectedGear)) do
+								local found = false;
+								for _, hasInput in pairs(getInputedGearCraft()) do
+									if input.ItemData.ItemName == hasInput then
+										found = true;
+										break;
+									end;
+								end;
+								if not found then
+									InputGearCraftItem(input.ItemType, i, getUUIDItemBackpack(input.ItemData.ItemName));
+								end;
+							end;
+						else
+							startCraftGear();
+						end;
+					else
+						CancelGearCraft();
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+AutoClaimGearCraftToggle = Tabs.CraftTab:Toggle({
+	Title = "Auto Claim",
+	Desc = "Auto claim when craft is completed",
+	Default = false,
+	Callback = function(state)
+		_G.AutoClaimGearCraft = state;
+	end
+});
+Config:Register("AutoClaimGearCraftToggle", AutoClaimGearCraftToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoClaimGearCraft then
+				if checkGearCraftIsDone() then
+					ClaimGearCraft();
+				end;
+			end;
+		end);
+	end;
+end);
+BeanstalkEventSection = Tabs.EventTab:Section({
+	Title = "Beanstalk Event",
+	TextXAlignment = "Left"
+});
+local Plants = {
+	["Prickly Plants"] = {
+		"Dragon Fruit",
+		"Pineapple",
+		"Cactus",
+		"Twisted Tangle",
+		"Prickle Fruit",
+		"Prickly Pear",
+		"Horned Dinoshroom"
+	},
+	["Woody Plants"] = {
+		"Pear",
+		"Apple",
+		"Avocado",
+		"Coconut",
+		"Kiwi",
+		"Mango",
+		"Nectarine",
+		"Maple Apple",
+		"Traveler's Fruit",
+		"Giant Pinecone"
+	},
+	["Tropical Plants"] = {
+		"Banana",
+		"Starfruit",
+		"Watermelon",
+		"Papaya",
+		"Durian",
+		"Coconut",
+		"Pineapple",
+		"Dragon Fruit",
+		"Mango",
+		"Parasol Flower",
+		"Passionfruit",
+		"Cocovine"
+	},
+	["Fruit Plants"] = {
+		"Strawberry",
+		"Blueberry",
+		"Pear Rare",
+		"Raspberry",
+		"Apple",
+		"Avocado",
+		"Banana",
+		"Cranberry",
+		"Crown Melon",
+		"Green Apple",
+		"Lingonberry",
+		"Pricklefruit",
+		"Starfruit",
+		"Blood Banana",
+		"Coconut",
+		"Dragon Fruit",
+		"Kiwi",
+		"Mango",
+		"Moon Melon",
+		"Nectarine",
+		"Pineapple",
+		"Grape",
+		"Maple Apple",
+		"Sugar Apple"
+	},
+	["Berry Plants"] = {
+		"Strawberry",
+		"Blueberry",
+		"Cranberry",
+		"Raspberry",
+		"Lingonberry",
+		"Celestiberry",
+		"Grape",
+		"Elder Strawberry"
+	},
+	["Flower Plants"] = {
+		"Artichoke",
+		"Orange Tulip",
+		"Rose",
+		"Zenflare",
+		"Lilac",
+		"Purple Dahlia",
+		"Grand Volcania",
+		"Rosy Delight",
+		"Burning Bud",
+		"Ember Lily"
+	}
+};
+function getEventStatus()
+	for i, v in pairs(workspace.Interaction.UpdateItems.BeanstalkEvent:GetChildren()) do
+		if v:FindFirstChild("Jack") then
+			return v.Jack.BeanstalkBubblePart.BeanstalkBillboard.BG.TraitTextLabel.Text;
+		end;
+	end;
+end;
+function getActivePlants()
+	local result = {};
+	for i, v in pairs(Plants) do
+		if string.find(getEventStatus(), i) then
+			for _, plant in pairs(v) do
+				table.insert(result, plant);
+			end;
+		end;
+	end;
+	return result;
+end;
+AutoCollectPlantsToggle = Tabs.EventTab:Toggle({
+	Title = "Auto Collect",
+	Desc = "Auto Collect Plants",
+	Default = false,
+	Callback = function(state)
+		_G.AutoCollectRequiredPlants = state;
+	end
+});
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoCollectRequiredPlants then
+				local allFruitsGarden = getAllFruitsGarden();
+				for i, v in pairs(getActivePlants()) do
+					for _, fruit in pairs(allFruitsGarden) do
+						if string.find(fruit.Name, v) or fruit.Name == v then
+							CollectFruit(fruit);
+							wait(0.01);
+							return
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+AutoSubmitPlantsToggle = Tabs.EventTab:Toggle({
+	Title = "Auto Submit",
+	Desc = "Auto Submit Plants",
+	Default = false,
+	Callback = function(state)
+		_G.AutoSubmitRequiredPlants = state;
+	end
+});
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoSubmitRequiredPlants then
+				if workspace.Interaction.UpdateItems.BeanstalkEvent.BeanStalkTimer.TimerBillboard.TextLabel.Visible == false then
+					local fruits = getFruitsBackpack();
+					for i, v in pairs(getActivePlants()) do
+						for _, fruit in pairs(fruits) do
+							if string.find(fruit.Name, v) or fruit.Name == v then
+								(RemoteEvents:WaitForChild("BeanstalkRESubmitAllPlant")):FireServer();
+								wait(0.1);
+								return
+							end;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+ClaimAllRewardsButton = Tabs.EventTab:Button({
+	Title = "Claim All Rewards",
+	Callback = function()
+		for i = 1, 5 do
+			(RemoteEvents:WaitForChild("BeanstalkREClaimReward")):FireServer(i);
+		end;
+	end
+});
+ClaimFenceButton = Tabs.EventTab:Button({
+	Title = "Claim Fence",
+	Callback = function()
+		(RemoteEvents:WaitForChild("BeanstalkREClaimFence")):FireServer();
+	end
+});
+SelectedItemsEventDropdown = Tabs.EventTab:Dropdown({
+	Title = "Select Items",
+	Values = shopEvent,
+	Value = nil,
+	Callback = function(option)
+		_G.SelectedItemsEvent = option;
+	end
+});
+AutoBuySelectedItemsEventToggle = Tabs.EventTab:Toggle({
+	Title = "Auto Buy",
+	Desc = "Auto Buy Selected Items",
+	Default = false,
+	Callback = function(state)
+		_G.AutoBuySelectedItemsEvent = state;
+	end
+});
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoBuySelectedItemsEvent then
+				local selectedItems = _G.SelectedItemsEvent;
+				local itemsStock = getEventShopStock();
+				if #itemsStock > 0 then
+					for i, v in pairs(itemsStock) do
+						if checkAvailable(selectedItems, v.Name) then
+							buyEventShopStock(v.Name);
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.EventTab:Divider();
+PetMutationSection = Tabs.EventTab:Section({
+	Title = "Pet Mutation",
+	TextXAlignment = "Left"
+});
+SelectedPetMutationDropdown = Tabs.EventTab:Dropdown({
+	Title = "Select Pet",
+	Values = petsBackpackList,
+	Value = nil,
+	Callback = function(option)
+		_G.SelectedPetMutation = option;
+	end
+});
+function StartMutationMachine()
+	(RemoteEvents:WaitForChild("PetMutationMachineService_RE")):FireServer("StartMachine");
+end;
+function SubmitPetMutation(pet)
+	if not game.Players.LocalPlayer.Character:FindFirstChild(pet.Name) then
+		equipTool(pet.Name);
+	end;
+	(RemoteEvents:WaitForChild("PetMutationMachineService_RE")):FireServer("SubmitHeldPet");
+	StartMutationMachine();
+end;
+AutoMutationPetToggle = Tabs.EventTab:Toggle({
+	Title = "Auto Mutation Pet",
+	Desc = "Auto submit and collect pet mutation",
+	Default = false,
+	Callback = function(state)
+		_G.AutoMutationPet = state;
+	end
+});
+function ClaimPetMutation()
+	(RemoteEvents:WaitForChild("PetMutationMachineService_RE")):FireServer("ClaimMutatedPet");
+end;
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoMutationPet then
+				if getMutationPetTimer() == nil or getMutationPetTimer() == "" and (not string.find(getMutationPetTimer(), "%d")) and (not string.find(getMutationPetTimer(), "READY")) then
+					for i, v in pairs(getPetsBackpack()) do
+						if _G.SelectedPetMutation and string.find(v.Name, _G.SelectedPetMutation) or v.Name == _G.SelectedPetMutation then
+							SubmitPetMutation(v);
+							task.wait(1);
+							return;
+						end;
+					end;
+				elseif string.find(getMutationPetTimer(), "READY") then
+					ClaimPetMutation();
+				end;
+			end;
+		end);
+	end;
+end);
+SubmitPetMutationButton = Tabs.EventTab:Button({
+	Title = "Submit Pet",
+	Desc = "Submit pet mutation",
+	Callback = function()
+		for i, v in pairs(getPetsBackpack()) do
+			if _G.SelectedPetMutation and (string.find(v.Name, _G.SelectedPetMutation) or v.Name == _G.SelectedPetMutation) then
+				SubmitPetMutation(v);
+			end;
+		end;
+	end
+});
+StartMachinePetMutationButton = Tabs.EventTab:Button({
+	Title = "Start Machine",
+	Desc = "Can be used without inserting the pet first",
+	Callback = function()
+		StartMutationMachine();
+	end
+});
+SpeedPlayerSection = Tabs.PlayerTab:Section({
+	Title = "Speed Player",
+	TextXAlignment = "Left"
+});
+SpeedPlayer = Tabs.PlayerTab:Slider({
+	Title = "Speed Player",
+	Step = 1,
+	Value = {
+		Min = 16,
+		Max = 200,
+		Default = 50
+	},
+	Callback = function(value)
+		_G.SpeedPlayer = value;
+	end
+});
+Config:Register("SpeedPlayer", SpeedPlayer);
+SetSpeedPlayerToggle = Tabs.PlayerTab:Toggle({
+	Title = "Set Speed Player",
+	Default = false,
+	Callback = function(state)
+		_G.SetSpeedPlayer = state;
+	end
+});
+Config:Register("SetSpeedPlayerToggle", SetSpeedPlayerToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.SetSpeedPlayer then
+				game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = _G.SpeedPlayer;
+			else
+				game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16;
+			end;
+		end);
+	end;
+end);
+Tabs.PlayerTab:Divider();
+InfiniteJumpSection = Tabs.PlayerTab:Section({
+	Title = "Infinite Jump",
+	TextXAlignment = "Left"
+});
+InfiniteJumpToggle = Tabs.PlayerTab:Toggle({
+	Title = "Infinite Jump",
+	Default = false,
+	Callback = function(state)
+		_G.InfiniteJump = state;
+	end
+});
+Config:Register("InfiniteJumpToggle", InfiniteJumpToggle);
+(game:GetService("UserInputService")).JumpRequest:Connect(function()
+	local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid");
+	if _G.InfiniteJump and humanoid then
+		humanoid:ChangeState(Enum.HumanoidStateType.Jumping);
+	end;
+end);
+Tabs.PlayerTab:Divider();
+local playerList = {};
+task.spawn(function()
+	for i, v in pairs((game:GetService("Players")):GetPlayers()) do
+		table.insert(playerList, v.Name);
+	end;
+end);
+PlayerListDropdown = Tabs.PlayerTab:Dropdown({
+	Title = "Player List",
+	Values = playerList,
+	Value = tostring(playerList[1]),
+	Multi = false,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPlayer = option;
+		end);
+	end
+});
+RefreshPlayerButton = Tabs.PlayerTab:Button({
+	Title = "Refresh Player List",
+	Callback = function()
+		playerList = {};
+		for i, v in pairs((game:GetService("Players")):GetPlayers()) do
+			table.insert(playerList, v.Name);
+		end;
+		PlayerListDropdown:Refresh(playerList);
+	end
+});
+TeleportToSelectedPlayerButton = Tabs.PlayerTab:Button({
+	Title = "Teleport To Selected Player",
+	Callback = function()
+		local player = (game:GetService("Players")):FindFirstChild(_G.SelectedPlayer);
+		if player then
+			(game:GetService("Players")).LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame;
+		end;
+	end
+});
+ServerSection = Tabs.ServerTab:Section({
+	Title = "Server",
+	TextXAlignment = "Left"
+});
+RejoinServerButton = Tabs.ServerTab:Button({
+	Title = "Rejoin Server",
+	Callback = function()
+		(game:GetService("TeleportService")):Teleport(game.PlaceId);
+	end
+});
+HopServerButton = Tabs.ServerTab:Button({
+	Title = "Hop Server",
+	Callback = function()
+		local module = (loadstring(game:HttpGet("https://raw.githubusercontent.com/raw-scriptpastebin/FE/main/Server_Hop_Settings")))();
+		module:Teleport(game.PlaceId);
+	end
+});
+Tabs.ServerTab:Divider();
+ServerVersionParagraph = Tabs.ServerTab:Paragraph({
+	Title = "Server Version",
+	Desc = (game:GetService("Players")).LocalPlayer.PlayerGui.Version_UI.Version.Text
+});
+Tabs.ServerTab:Divider();
+JobIdSection = Tabs.ServerTab:Section({
+	Title = "Job ID",
+	TextXAlignment = "Left"
+});
+JobIdParagraph = Tabs.ServerTab:Paragraph({
+	Title = "Job ID",
+	Desc = game.JobId
+});
+CopyJobIdButton = Tabs.ServerTab:Button({
+	Title = "Copy Job ID",
+	Callback = function()
+		setclipboard(game.JobId);
+	end
+});
+JobIdInput = Tabs.ServerTab:Input({
+	Title = "Job ID",
+	Placeholder = "Enter Job ID",
+	Type = "Input",
+	Callback = function(value)
+		_G.JobId = value;
+	end
+});
+JoinJobIdServerButton = Tabs.ServerTab:Button({
+	Title = "Join Job ID",
+	Callback = function()
+		(game:GetService("TeleportService")):TeleportToPlaceInstance(game.PlaceId, _G.JobId);
+	end
+});
+function refreshSeedStock()
+	local result = "";
+	local seedStock = getSeedStock();
+	local sortedByRarity = sortItemsByRarity(seedStock);
+	if #sortedByRarity > 0 then
+		for i, v in pairs(sortedByRarity) do
+			local rarity = setTextColor(v.Main_Frame.Rarity_Text.Text, generateRarityColor(v.Main_Frame.Rarity_Text.Text));
+			local getStockCount = string.match(v.Main_Frame.Stock_Text.Text, "X(%d+)");
+			local stock = setTextColor("x" .. getStockCount, tostring("255, 255, 255"));
+			result = result .. stock .. " " .. v.Name .. " - " .. rarity;
+			if i < (#sortedByRarity) then
+				result = result .. "\n";
+			end;
+		end;
+	else
+		result = "Out of Stock";
+	end;
+	return result;
+end;
+SeedStockSection = Tabs.StockTab:Section({
+	Title = "Seed Stock",
+	TextXAlignment = "Left"
+});
+SeedStockParagraph = Tabs.StockTab:Paragraph({
+	Title = "Seed Stock",
+	Desc = "N/A"
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			local stockTimer = getSeedResetTimer();
+			SeedStockParagraph:SetTitle(stockTimer);
+		end);
+	end;
+end);
+spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			SeedStockParagraph:SetDesc(tostring(refreshSeedStock()));
+		end);
+	end;
+end);
+Tabs.StockTab:Divider();
+function refreshGearStock()
+	local result = "";
+	local gearStock = getGearStock();
+	local sortedByRarity = sortItemsByRarity(gearStock);
+	if #sortedByRarity > 0 then
+		for i, v in pairs(sortedByRarity) do
+			local rarity = setTextColor(v.Main_Frame.Rarity_Text.Text, generateRarityColor(v.Main_Frame.Rarity_Text.Text));
+			local getStockCount = string.match(v.Main_Frame.Stock_Text.Text, "X(%d+)");
+			local stock = setTextColor("x" .. getStockCount, tostring("255, 255, 255"));
+			result = result .. stock .. " " .. v.Name .. " - " .. rarity;
+			if i < (#sortedByRarity) then
+				result = result .. "\n";
+			end;
+		end;
+	else
+		result = "Out of stock";
+	end;
+	return result;
+end;
+GearStockSection = Tabs.StockTab:Section({
+	Title = "Gear Stock",
+	TextXAlignment = "Left"
+});
+GearStockParagraph = Tabs.StockTab:Paragraph({
+	Title = "Gear Stock",
+	Desc = "N/A"
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			local stockTimer = getGearResetTimer();
+			GearStockParagraph:SetTitle(stockTimer);
+		end);
+	end;
+end);
+spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			GearStockParagraph:SetDesc(tostring(refreshGearStock()));
+		end);
+	end;
+end);
+Tabs.StockTab:Divider();
+function refreshCosmeticCrateStock()
+	local result = "";
+	local cosmeticStock = getCosmeticCrateShopStock();
+	if #cosmeticStock > 0 then
+		for i, v in pairs(cosmeticStock) do
+			result = result .. v.Name;
+			if i < (#cosmeticStock) then
+				result = result .. "\n";
+			end;
+		end;
+	else
+		result = "Out of stock";
+	end;
+	return result;
+end;
+function refreshCosmeticItemStock()
+	local result = "";
+	local cosmeticStock = getCosmeticItemShopStock();
+	if #cosmeticStock > 0 then
+		for i, v in pairs(cosmeticStock) do
+			result = result .. v.Name;
+			if i < (#cosmeticStock) then
+				result = result .. "\n";
+			end;
+		end;
+	else
+		result = "Out of stock";
+	end;
+	return result;
+end;
+CosmeticStockSection = Tabs.StockTab:Section({
+	Title = "Cosmetic Stock",
+	TextXAlignment = "Left"
+});
+CosmeticCrateStockParagraph = Tabs.StockTab:Paragraph({
+	Title = "Cosmetic Crate Stock",
+	Desc = "N/A"
+});
+CosmeticItemStockParagraph = Tabs.StockTab:Paragraph({
+	Title = "Cosmetic Item Stock",
+	Desc = "N/A"
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			local stockTimer = getCosmeticShopResetTimer();
+			CosmeticCrateStockParagraph:SetTitle(stockTimer);
+		end);
+	end;
+end);
+spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			CosmeticCrateStockParagraph:SetDesc(tostring(refreshCosmeticCrateStock()));
+		end);
+	end;
+end);
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			local stockTimer = getCosmeticShopResetTimer();
+			CosmeticItemStockParagraph:SetTitle(stockTimer);
+		end);
+	end;
+end);
+spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			CosmeticItemStockParagraph:SetDesc(tostring(refreshCosmeticItemStock()));
+		end);
+	end;
+end);
+Tabs.StockTab:Divider();
+function refreshEggsStock()
+	local result = "";
+	local eggsStock = getEggStock();
+	for i, v in pairs(eggsStock) do
+		result = result .. v.EggName;
+		if i < (#eggsStock) then
+			result = result .. "\n";
+		end;
+	end;
+	return result;
+end;
+EggsStockSection = Tabs.StockTab:Section({
+	Title = "Eggs Stock",
+	TextXAlignment = "Left"
+});
+EggsStockParagraph = Tabs.StockTab:Paragraph({
+	Title = "Eggs Stock",
+	Desc = "N/A"
+});
+spawn(function()
+	while task.wait() do
+		pcall(function()
+			local stockTimer = getPetStandResetTimer();
+			EggsStockParagraph:SetTitle("New eggs in " .. stockTimer);
+		end);
+	end;
+end);
+spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			EggsStockParagraph:SetDesc(tostring(refreshEggsStock()));
+		end);
+	end;
+end);
+function formatMoney(number)
+	local formatted = tostring(number);
+	while true do
+		formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", "%1,%2");
+		if k == 0 then
+			break;
+		end;
+	end;
+	return formatted;
+end;
+CalculateBackpackSection = Tabs.CalculationTab:Section({
+	Title = "Calculate Backpack",
+	TextXAlignment = "Left"
+});
+PriceResultBackpackParagraph = Tabs.CalculationTab:Paragraph({
+	Title = "Result",
+	Desc = "N/A"
+});
+CalculateBackpackButton = Tabs.CalculationTab:Button({
+	Title = "Calculate",
+	Desc = "Calculate the total value of the fruits in your backpack",
+	Callback = function()
+		local fruits = getFruitsBackpack();
+		local priceResult = 0;
+		for i, v in pairs(fruits) do
+			priceResult = priceResult + tonumber(ServerCalculatePlantValue(v));
+		end;
+		PriceResultBackpackParagraph:SetDesc(formatMoney(priceResult));
+	end
+});
+Tabs.CalculationTab:Divider();
+CalculateGardenSection = Tabs.CalculationTab:Section({
+	Title = "Calculate Garden",
+	TextXAlignment = "Left"
+});
+PriceResultGardenParagraph = Tabs.CalculationTab:Paragraph({
+	Title = "Result",
+	Desc = "N/A"
+});
+CalculateGardenButton = Tabs.CalculationTab:Button({
+	Title = "Calculate",
+	Desc = "Calculate the total value of the fruits in your garden",
+	Callback = function()
+		local fruits = getAllFruitsGarden();
+		local priceResult = 0;
+		for i, v in pairs(fruits) do
+			priceResult = priceResult + tonumber(ServerCalculatePlantValue(v));
+		end;
+		PriceResultGardenParagraph:SetDesc(formatMoney(priceResult));
+	end
+});
+Tabs.CalculationTab:Divider();
+MostExpensiveFruitGardenSection = Tabs.CalculationTab:Section({
+	Title = "Most Expensive Fruit Garden",
+	TextXAlignment = "Left"
+});
+PriceResultMostExpensiveFruitGardenParagraph = Tabs.CalculationTab:Paragraph({
+	Title = "Result",
+	Desc = "N/A"
+});
+FindMostExpensiveFruitGardenButton = Tabs.CalculationTab:Button({
+	Title = "Find",
+	Desc = "Find the most expensive fruit in your garden",
+	Callback = function()
+		local fruits = getAllFruitsGarden();
+		local mostExpensiveFruit = nil;
+		local highestPrice = 0;
+		for i, v in pairs(fruits) do
+			local fruitPrice = tonumber(ServerCalculatePlantValue(v));
+			if fruitPrice > highestPrice then
+				highestPrice = fruitPrice;
+				mostExpensiveFruit = v;
+				_G.MostExpensiveFruitGarden = v;
+			end;
+		end;
+		PriceResultMostExpensiveFruitGardenParagraph:SetDesc(mostExpensiveFruit.Name .. " - " .. formatMoney(highestPrice));
+	end
+});
+CollectMostExpensiveFruitGardenButton = Tabs.CalculationTab:Button({
+	Title = "Collect",
+	Callback = function()
+		CollectFruit(_G.MostExpensiveFruitGarden);
+	end
+});
+TeleportToMostExpensiveFruitGardenButton = Tabs.CalculationTab:Button({
+	Title = "Teleport",
+	Callback = function()
+		moveTo(_G.MostExpensiveFruitGarden.WorldPivot.Position);
+	end
+});
+Tabs.CalculationTab:Divider();
+MostExpensiveFruitServerSection = Tabs.CalculationTab:Section({
+	Title = "Most Expensive Fruit Server",
+	TextXAlignment = "Left"
+});
+PriceResultMostExpensiveFruitServerParagraph = Tabs.CalculationTab:Paragraph({
+	Title = "Result",
+	Desc = "N/A"
+});
+FindMostExpensiveFruitServerButton = Tabs.CalculationTab:Button({
+	Title = "Find",
+	Desc = "Find the most expensive fruit in the server",
+	Callback = function()
+		local fruits = getAllFruitsServer();
+		local mostExpensiveFruit = nil;
+		local highestPrice = 0;
+		for i, v in pairs(fruits) do
+			local fruitPrice = tonumber(ServerCalculatePlantValue(v));
+			if fruitPrice > highestPrice then
+				highestPrice = fruitPrice;
+				mostExpensiveFruit = v;
+				_G.MostExpensiveFruitServer = v;
+			end;
+		end;
+		PriceResultMostExpensiveFruitServerParagraph:SetDesc(mostExpensiveFruit.Name .. " - " .. formatMoney(highestPrice));
+	end
+});
+CollectMostExpensiveFruitServerButton = Tabs.CalculationTab:Button({
+	Title = "Collect",
+	Callback = function()
+		CollectFruit(_G.MostExpensiveFruitServer);
+	end
+});
+TeleportToMostExpensiveFruitServerButton = Tabs.CalculationTab:Button({
+	Title = "Teleport",
+	Callback = function()
+		moveTo(_G.MostExpensiveFruitServer.WorldPivot.Position);
+	end
+});
+PetLoadoutSection = Tabs.PetTab:Section({
+	Title = "Pet Loadout",
+	TextXAlignment = "Left"
+});
+SelectedLoadout = Tabs.PetTab:Dropdown({
+	Title = "Select Loadout",
+	Value = nil,
+	Values = {
+		1,
+		2,
+		3
+	},
+	Callback = function(state)
+		_G.SelectedLoadout = state;
+	end
+});
+function SwapLoadout(loadout)
+	(RemoteEvents:WaitForChild("PetsService")):FireServer("SwapPetLoadout", loadout);
+end;
+SwapLoadoutButton = Tabs.PetTab:Button({
+	Title = "Swap Loadout",
+	Callback = function()
+		SwapLoadout(_G.SelectedLoadout);
+	end
+});
+AutoEggSection = Tabs.PetTab:Section({
+	Title = "Eggs",
+	TextXAlignment = "Left"
+});
+SelectedEggsDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Egg",
+	Value = nil,
+	Values = allEggs,
+	Callback = function(state)
+		_G.SelectedEggModel = state;
+	end
+});
+Config:Register("SelectedEggsDropdown", SelectedEggsDropdown);
+LimitPlaceEggInput = Tabs.PetTab:Input({
+	Title = "Limit",
+	Placeholder = "Enter number",
+	Callback = function(value)
+		if tonumber(value) then
+			_G.LimitPlaceEgg = tonumber(value);
+		end;
+	end
+});
+Config:Register("LimitPlaceEggInput", LimitPlaceEggInput);
+AutoPlaceEggToggle = Tabs.PetTab:Toggle({
+	Title = "Auto Place Egg",
+	Desc = "Automatically place pet eggs",
+	Default = false,
+	Callback = function(state)
+		_G.AutoPlaceEgg = state;
+	end
+});
+Config:Register("AutoPlaceEggToggle", AutoPlaceEggToggle);
+function getHeldEgg()
+	local char = (game:GetService("Players")).LocalPlayer.Character;
+	for i, v in pairs(allEggs) do
+		for _, held in pairs(char:GetChildren()) do
+			if string.find(held.Name, v) or held.Name == v then
+				return v;
+			end;
+		end;
+	end;
+	return nil;
+end;
+function PlaceEgg(egg, pos)
+	local tool = getBackpackByName(egg);
+	if tool and (not (game:GetService("Players")).LocalPlayer.Character:FindFirstChild(tool.Name)) then
+		equipTool(tool.Name);
+	end;
+	(RemoteEvents:WaitForChild("PetEggService")):FireServer("CreateEgg", pos);
+end;
+function getCountEgg(egg)
+	local result = {};
+	for i, v in pairs((getOwrnerFarm()).Important.Objects_Physical:GetChildren()) do
+		if v.Name == "PetEgg" and v:FindFirstChild(egg) then
+			table.insert(result, v);
+		end;
+	end;
+	return #result;
+end;
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoPlaceEgg then
+				for i, v in pairs((getOwrnerFarm()).Important.Plant_Locations:GetChildren()) do
+					if getCountEgg(_G.SelectedEggModel) < _G.LimitPlaceEgg then
+						PlaceEgg(_G.SelectedEggModel, (getRandomPosPlant(v)).Position);
+						wait(0.1);
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+AutoOpenEggToggle = Tabs.PetTab:Toggle({
+	Title = "Auto Open Egg",
+	Desc = "Automatically open pet eggs",
+	Default = false,
+	Callback = function(state)
+		_G.AutoOpenEgg = state;
+	end
+});
+Config:Register("AutoOpenEggToggle", AutoOpenEggToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoOpenEgg then
+				for i, v in pairs((getOwrnerFarm()).Important.Objects_Physical:GetChildren()) do
+					if v.Name == "PetEgg" then
+						OpenEgg(v);
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoMiddlePet then
+				for i, v in pairs(getActivePet()) do
+					v.LastUpdatedPosition = CFrame.new(getMiddlePosFarm());
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.PetTab:Divider();
+PickupPetSection = Tabs.PetTab:Section({
+	Title = "Pickup Pet",
+	TextXAlignment = "Left"
+});
+SelectedPetPickupDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Pet",
+	Values = petList,
+	Value = nil,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPetPickup = option;
+		end);
+	end
+});
+RefreshSelectedPetPickupButton = Tabs.PetTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local petList = {};
+		for i, v in pairs(ActivePetModule.ClientPetState[game.Players.LocalPlayer.Name]) do
+			table.insert(petList, i);
+		end;
+		SelectedPetPickupDropdown:Refresh(petList);
+	end
+});
+function PickupPet(pet)
+	(RemoteEvents:WaitForChild("PetsService")):FireServer("UnequipPet", pet);
+end;
+PickupPetButton = Tabs.PetTab:Button({
+	Title = "Pickup",
+	Desc = "Unequip pet",
+	Callback = function()
+		PickupPet(_G.SelectedPetPickup);
+	end
+});
+PickupAllPetButton = Tabs.PetTab:Button({
+	Title = "Pickup All",
+	Desc = "Unequip all pets",
+	Callback = function()
+		for i, v in pairs(petList) do
+			PickupPet(v);
+		end;
+	end
+});
+Tabs.PetTab:Divider();
+EquipPetSection = Tabs.PetTab:Section({
+	Title = "Equip Pet",
+	TextXAlignment = "Left"
+});
+SelectedPetEquipDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Pet",
+	Values = filterUnique(petsBackpackList),
+	Value = nil,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPetEquip = option;
+		end);
+	end
+});
+RefreshSelectedPetEquipButton = Tabs.PetTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local petList = {};
+		for i, v in pairs(getPetsBackpack()) do
+			table.insert(petList, v.Name);
+		end;
+		SelectedPetEquipDropdown:Refresh(filterUnique(petList));
+	end
+});
+function EquipPet(pet)
+	for i, v in pairs((getOwrnerFarm()).Important.Plant_Locations:GetChildren()) do
+		(RemoteEvents:WaitForChild("PetsService")):FireServer("EquipPet", pet, getRandomPosPlant(v));
+	end;
+end;
+EquipPetButton = Tabs.PetTab:Button({
+	Title = "Equip",
+	Callback = function()
+		for i, v in pairs(getPetsBackpack()) do
+			if v.Name == _G.SelectedPetEquip then
+				EquipPet(getUUIDItemBackpack(v.Name));
+			end;
+		end;
+	end
+});
+Tabs.PetTab:Divider();
+TradePetSection = Tabs.PetTab:Section({
+	Title = "Trade Pet",
+	TextXAlignment = "Left"
+});
+SelectedPetTradeDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Pet",
+	Values = getAllPets(),
+	Value = nil,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPetTrade = option;
+		end);
+	end
+});
+SelectPlayerPetTradeDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Player",
+	Values = playerList,
+	Value = nil,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectPlayerPetTrade = option;
+		end);
+	end
+});
+RefreshSelectPlayerPetTradeButton = Tabs.PetTab:Button({
+	Title = "Refresh",
+	Callback = function()
+		local playerList = {};
+		for i, v in pairs((game:GetService("Players")):GetPlayers()) do
+			table.insert(playerList, v.Name);
+		end;
+		SelectPlayerPetTradeDropdown:Refresh(playerList);
+	end
+});
+function GivePet(pet)
+	if not (game:GetService("Players")).LocalPlayer.Character:FindFirstChild(pet.Name) then
+		equipTool(pet.Name);
+	end;
+	(RemoteEvents:WaitForChild("PetGiftingService")):FireServer("GivePet", (game:GetService("Players")):WaitForChild(_G.SelectPlayerPetTrade));
+end;
+InputQuantityGivePetInput = Tabs.PetTab:Input({
+	Title = "Quantity",
+	Placeholder = "Enter number",
+	Callback = function(value)
+		if tonumber(value) then
+			_G.QuantityGivePet = tonumber(value);
+		end;
+	end
+});
+GivePetButton = Tabs.PetTab:Button({
+	Title = "Give Pet",
+	Callback = function()
+		for _, pet in pairs(getPetsBackpack()) do
+			if string.find(pet.Name, _G.SelectedPetTrade) then
+				for i = 1, _G.QuantityGivePet do
+					GivePet(pet);
+					wait(1);
+				end;
+			end;
+		end;
+	end
+});
+Tabs.PetTab:Divider();
+SellPetSection = Tabs.PetTab:Section({
+	Title = "Sell Pet",
+	TextXAlignment = "Left"
+});
+SelectedRaritySellPetsDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Rarity Pets",
+	Values = petRarities,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedRaritySellPets = option;
+		end);
+	end
+});
+Config:Register("SelectedRaritySellPetsDropdown", SelectedRaritySellPetsDropdown);
+AutoSellPetToggle = Tabs.PetTab:Toggle({
+	Title = "Auto Sell Pet",
+	Default = false,
+	Callback = function(state)
+		_G.AutoSellPet = state;
+	end
+});
+Config:Register("AutoSellPetToggle", AutoSellPetToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoSellPet then
+				for i, v in pairs(getPetsBackpack()) do
+					for _, rarity in pairs(_G.SelectedRaritySellPets) do
+						if getPetRarity(string.match(v.Name, "^(.-) %[")) == rarity then
+							equipTool(v.Name);
+							local pet = game.Players.LocalPlayer.Character:FindFirstChild(v.Name);
+							if pet then
+								sellPet(pet);
+							end;
+							wait(0.5);
+							return;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+Tabs.PetTab:Divider();
+FeedPetSection = Tabs.PetTab:Section({
+	Title = "Feed Pet",
+	TextXAlignment = "Left"
+});
+SelectedFeedPetDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Pet",
+	Values = petList,
+	Value = nil,
+	Callback = function(option)
+		pcall(function()
+			_G.SelectedPet = option;
+		end);
+	end
+});
+SelectedFruitFeedPetDropdown = Tabs.PetTab:Dropdown({
+	Title = "Select Fruit",
+	Values = allPlants,
+	Value = {},
+	Multi = true,
+	AllowNone = true,
+	Callback = function(option)
+		pcall(function()
+		end);
+		_G.SelectedFeedPetFruit = option;
+	end
+});
+AutoFeedPetToggle = Tabs.PetTab:Toggle({
+	Title = "Auto Feed Pet",
+	Default = false,
+	Callback = function(state)
+		_G.AutoFeedPet = state;
+	end
+});
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.AutoFeedPet then
+				local SelectedFruits = _G.SelectedFeedPetFruit;
+				local fruits = getFruitsBackpack();
+				for i, v in pairs(fruits) do
+					for _, fruit in pairs(SelectedFruits) do
+						if string.find(v.Name, fruit) then
+							equipTool(v.Name);
+							if game.Players.LocalPlayer.Character:FindFirstChild(v.Name) then
+								feedPet(_G.SelectedPet);
+							end;
+							wait(0.5);
+							return;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+FeedPetButton = Tabs.PetTab:Button({
+	Title = "Feed Pet",
+	Desc = "Feed the pet with the fruit it holds",
+	Callback = function()
+		feedPet(_G.SelectedPet);
+	end
+});
+ShovelSprinklerSection = Tabs.MiscTab:Section({
+	Title = "Infinite Sprinkler",
+	TextXAlignment = "Left"
+});
+ShovelSprinklerButton = Tabs.MiscTab:Button({
+	Title = "Shovel Sprinkler",
+	Desc = "Remove All Sprinkler",
+	Callback = function()
+		for _, v in pairs((getOwrnerFarm()).Important.Objects_Physical:GetChildren()) do
+			if string.find(v.Name, "Sprinkler") then
+				v.Name = "Shoveled";
+				RemoveObject(v);
+			end;
+		end;
+	end
+});
+OtherTeleportSection = Tabs.MiscTab:Section({
+	Title = "Other Teleport",
+	TextXAlignment = "Left"
+});
+ShowOthersTeleportButtonToggle = Tabs.MiscTab:Toggle({
+	Title = "Show Button",
+	Desc = "Show the others teleport button",
+	Default = false,
+	Callback = function(Value)
+		(game:GetService("Players")).LocalPlayer.PlayerGui.Teleport_UI.Frame.Gear.Visible = Value;
+		(game:GetService("Players")).LocalPlayer.PlayerGui.Teleport_UI.Frame.Pets.Visible = Value;
+	end
+});
+Config:Register("ShowOthersTeleportButtonToggle", ShowOthersTeleportButtonToggle);
+Tabs.MiscTab:Divider();
+VisualSection = Tabs.MiscTab:Section({
+	Title = "Visual",
+	TextXAlignment = "Left"
+});
+ShowValueFruitsBackpackToggle = Tabs.MiscTab:Toggle({
+	Title = "Show Value Fruits Backpack",
+	Desc = "Show the value fruits in the backpack",
+	Default = false,
+	Callback = function(Value)
+		_G.ShowValueFruitsBackpack = Value;
+	end
+});
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.ShowValueFruitsBackpack then
+				addShecklesEspBackpack(true);
+			else
+				addShecklesEspBackpack(false);
+			end;
+		end);
+	end;
+end);
+Config:Register("ShowValueFruitsBackpackToggle", ShowValueFruitsBackpackToggle);
+HidePlantToggle = Tabs.MiscTab:Toggle({
+	Title = "Hide Plant",
+	Default = false,
+	Callback = function(Value)
+		_G.HidePlant = Value;
+	end
+});
+Config:Register("HidePlantToggle", HidePlantToggle);
+spawn(function()
+	while wait() do
+		pcall(function()
+			if _G.HidePlant then
+				for i, v in pairs(getAllPlantsGarden()) do
+					for _, plant in pairs(v:GetChildren()) do
+						if plant:IsA("BasePart") then
+							plant.Transparency = 1;
+							plant.CanCollide = false;
+						end;
+					end;
+				end;
+			else
+				for i, v in pairs(getAllPlantsGarden()) do
+					for _, plant in pairs(v:GetChildren()) do
+						if plant:IsA("BasePart") then
+							plant.Transparency = 0;
+							plant.CanCollide = true;
+						end;
+					end;
+				end;
+			end;
+		end);
+	end;
+end);
+function DestroyOthersGarden()
+	for i, v in pairs(getAllFarm()) do
+		if v.Important.Data.Owner.Value ~= game.Players.LocalPlayer.Name then
+			v:Destroy();
+		end;
+	end;
+end;
+DestroyOthersGardenButton = Tabs.MiscTab:Button({
+	Title = "Destroy Others Garden",
+	Callback = function()
+		DestroyOthersGarden();
+	end
+});
+Config:Load();
