@@ -52,7 +52,7 @@ RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
 
--- LABEL FUNCTION
+-- LABEL FUNCTION WITH LINE
 local function createLabel(yPos, text)
 	local L = Instance.new("TextLabel", Main)
 	L.Position = UDim2.new(0,0,yPos,0)
@@ -62,13 +62,21 @@ local function createLabel(yPos, text)
 	L.TextSize = 12
 	L.TextColor3 = Color3.fromRGB(220,220,220)
 	L.Text = text
-	return L
+
+	-- LINE UNDER LABEL
+	local Line = Instance.new("Frame", Main)
+	Line.Size = UDim2.new(0.9,0,0,1)
+	Line.Position = UDim2.new(0.05,0,yPos+0.025,0)
+	Line.BackgroundColor3 = Color3.fromRGB(100,100,100)
+	Line.BorderSizePixel = 0
+
+	return L, Line
 end
 
-local Status = createLabel(0.28, "Status: Running")
-local TimeLabel = createLabel(0.45, "Time: 0s")
-local FPSLabel = createLabel(0.60, "FPS: 0")
-local PingLabel = createLabel(0.75, "Ping: 0 ms")
+local Status, Line1 = createLabel(0.28, "Status: Running")
+local TimeLabel, Line2 = createLabel(0.45, "Time: 0s")
+local FPSLabel, Line3 = createLabel(0.60, "FPS: 0")
+local PingLabel, Line4 = createLabel(0.75, "Ping: 0 ms")
 
 -- UPDATE LOOP
 spawn(function()
