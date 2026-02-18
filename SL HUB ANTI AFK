@@ -1,147 +1,100 @@
 repeat task.wait() until game:IsLoaded()
 
-if getgenv().SL_HUB_EXECUTED then return end
-getgenv().SL_HUB_EXECUTED = true
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 
--- Anti AFK
-LocalPlayer.Idled:Connect(function()
-	local vu = game:GetService("VirtualUser")
-	vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-	task.wait(1)
-	vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-end)
+if getgenv().SL_HUB_AFK then return end
+getgenv().SL_HUB_AFK = true
 
--- Key system
-local MAIN_KEY = "SLONTOP"
-local GET_KEY_LINK = "https://discord.gg/YOUR_SERVER"
+local startTime = tick()
 
--- Key GUI
-local Gui = Instance.new("ScreenGui", game.CoreGui)
-Gui.Name = "SL_KEY_SYSTEM"
+-- GUI
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "SL_HUB_AFK"
+Gui.Parent = game.CoreGui
 
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0,360,0,230)
-Main.Position = UDim2.new(0.5,-180,0.5,-115)
+Main.Size = UDim2.new(0,190,0,160)
+Main.Position = UDim2.new(0.82,0,0.12,0)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Main.BorderSizePixel = 0
 Main.Active = true
 Main.Draggable = true
 Instance.new("UICorner", Main)
 
 local Stroke = Instance.new("UIStroke", Main)
-Stroke.Thickness = 2
+Stroke.Thickness = 1.5
 
+-- RGB ANIMATION FOR STROKE
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.003) % 1
 	Stroke.Color = Color3.fromHSV(hue,1,1)
 end)
 
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1,0,0,45)
+-- TITLE BAR
+local Top = Instance.new("Frame", Main)
+Top.Size = UDim2.new(1,0,0,28)
+Top.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Top.BorderSizePixel = 0
+Instance.new("UICorner", Top)
+
+local Title = Instance.new("TextLabel", Top)
+Title.Size = UDim2.new(1,0,1,0)
 Title.BackgroundTransparency = 1
-Title.Text = "SL HUB"
+Title.Text = "SL HUB | ANTI AFK"
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
+Title.TextSize = 12
 
 RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
 
-local Box = Instance.new("TextBox", Main)
-Box.Size = UDim2.new(0.85,0,0,40)
-Box.Position = UDim2.new(0.075,0,0.35,0)
-Box.PlaceholderText = "ENTER KEY"
-Box.Font = Enum.Font.Gotham
-Box.TextSize = 14
-Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Box.TextColor3 = Color3.fromRGB(255,255,255)
-Instance.new("UICorner", Box)
+-- FUNCTION TO CREATE LABELS WITH LINES
+local function createLabel(yPos, text)
+	local L = Instance.new("TextLabel", Main)
+	L.Position = UDim2.new(0,0,yPos,0)
+	L.Size = UDim2.new(1,0,0,22)
+	L.BackgroundTransparency = 1
+	L.Font = Enum.Font.Gotham
+	L.TextSize = 12
+	L.TextColor3 = Color3.fromRGB(220,220,220)
+	L.Text = text
 
-local Verify = Instance.new("TextButton", Main)
-Verify.Size = UDim2.new(0.85,0,0,40)
-Verify.Position = UDim2.new(0.075,0,0.65,0)
-Verify.Text = "VERIFY"
-Verify.Font = Enum.Font.GothamBold
-Verify.TextSize = 14
-Verify.BackgroundColor3 = Color3.fromRGB(30,30,30)
-Instance.new("UICorner", Verify)
+	-- FIXED LINE UNDER LABEL
+	local Line = Instance.new("Frame", Main)
+	Line.Size = UDim2.new(0.9,0,0,1)
+	Line.Position = UDim2.new(0.05,0,yPos+0.025,0)
+	Line.BackgroundColor3 = Color3.fromRGB(100,100,100)
+	Line.BorderSizePixel = 0
 
-Verify.MouseButton1Click:Connect(function()
-	local key = string.upper(string.gsub(Box.Text,"%s+",""))
-	if key == MAIN_KEY then
-		Gui:Destroy() -- GUI يختفي فور الضغط
+	return L
+end
 
-		-- Main Menu GUI
-		local Menu = Instance.new("ScreenGui", game.CoreGui)
-		Menu.Name = "SL_MAIN_MENU"
+local Status = createLabel(0.28, "Status: Running")
+local TimeLabel = createLabel(0.45, "Time: 0s")
+local FPSLabel = createLabel(0.60, "FPS: 0")
+local PingLabel = createLabel(0.75, "Ping: 0 ms")
 
-		local Frame = Instance.new("Frame", Menu)
-		Frame.Size = UDim2.new(0,400,0,350)
-		Frame.Position = UDim2.new(0.5,-200,0.5,-175)
-		Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-		Frame.Active = true
-		Frame.Draggable = true
-		Instance.new("UICorner", Frame)
-
-		local Layout = Instance.new("UIListLayout", Frame)
-		Layout.Padding = UDim.new(0,12)
-		Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		Layout.VerticalAlignment = Enum.VerticalAlignment.Center
-
-		local Title2 = Instance.new("TextLabel", Frame)
-		Title2.Size = UDim2.new(1,0,0,40)
-		Title2.Position = UDim2.new(0,0,0,0)
-		Title2.BackgroundTransparency = 1
-		Title2.Text = "SL HUB"
-		Title2.Font = Enum.Font.GothamBold
-		Title2.TextSize = 18
-
-		RunService.RenderStepped:Connect(function()
-			Title2.TextColor3 = Color3.fromHSV(hue,1,1)
-		end)
-
-		local function AddButton(name,url)
-			local btn = Instance.new("TextButton", Frame)
-			btn.Size = UDim2.new(0.85,0,0,50)
-			btn.Text = name
-			btn.Font = Enum.Font.GothamBold
-			btn.TextSize = 16
-			btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-			btn.TextColor3 = Color3.fromRGB(255,255,255)
-			Instance.new("UICorner", btn)
-
-			btn.MouseButton1Click:Connect(function()
-				-- Loading Sign
-				local loadSign = Instance.new("TextLabel", Frame)
-				loadSign.Size = UDim2.new(1,0,0,30)
-				loadSign.Position = UDim2.new(0,0,0,Frame.AbsoluteSize.Y-40)
-				loadSign.BackgroundTransparency = 1
-				loadSign.Text = "Loading..."
-				loadSign.Font = Enum.Font.GothamBold
-				loadSign.TextSize = 16
-				loadSign.TextColor3 = Color3.fromRGB(255,255,255)
-
-				Menu:Destroy() -- GUI يختفي فور الضغط
-
-				pcall(function()
-					loadstring(game:HttpGet(url))()
-				end)
-			end)
-		end
-
-		-- Buttons
-		AddButton("Legends Of Speed","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20LOS")
-		AddButton("Muscle Legends","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ML%20(1).txt")
-		AddButton("Blox Fruits","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/BloxFruits")
-		AddButton("Escape Tsunami","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/Tusnammi.txt")
-		AddButton("Anti AFK","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ANTI%20AFK")
-
-	else
-		Box.Text = ""
-		Box.PlaceholderText = "WRONG KEY"
+-- UPDATE LOOP
+spawn(function()
+	while true do
+		task.wait(1)
+		local elapsed = math.floor(tick() - startTime)
+		TimeLabel.Text = "Time: "..elapsed.."s"
+		local fps = math.floor(1/RunService.RenderStepped:Wait())
+		FPSLabel.Text = "FPS: "..fps
+		local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+		PingLabel.Text = "Ping: "..ping.." ms"
 	end
+end)
+
+-- ANTI AFK
+LocalPlayer.Idled:Connect(function()
+	local vu = game:GetService("VirtualUser")
+	vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+	task.wait(1)
+	vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
