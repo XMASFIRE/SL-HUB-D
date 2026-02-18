@@ -5,8 +5,8 @@ local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 
-if getgenv().SL_ENCH_STYLE then return end
-getgenv().SL_ENCH_STYLE = true
+if getgenv().SL_HUB_AFK then return end
+getgenv().SL_HUB_AFK = true
 
 local startTime = tick()
 
@@ -22,32 +22,37 @@ Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.BorderSizePixel = 0
 Main.Active = true
 Main.Draggable = true
-
-local Corner = Instance.new("UICorner", Main)
-Corner.CornerRadius = UDim.new(0,8)
+Instance.new("UICorner", Main)
 
 local Stroke = Instance.new("UIStroke", Main)
-Stroke.Color = Color3.fromRGB(0,255,120)
 Stroke.Thickness = 1.5
 
--- Title Bar
+-- RGB ANIMATION
+local hue = 0
+RunService.RenderStepped:Connect(function()
+	hue = (hue + 0.003) % 1
+	Stroke.Color = Color3.fromHSV(hue,1,1)
+end)
+
+-- TITLE BAR
 local Top = Instance.new("Frame", Main)
 Top.Size = UDim2.new(1,0,0,28)
 Top.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Top.BorderSizePixel = 0
-
-local TopCorner = Instance.new("UICorner", Top)
-TopCorner.CornerRadius = UDim.new(0,8)
+Instance.new("UICorner", Top)
 
 local Title = Instance.new("TextLabel", Top)
 Title.Size = UDim2.new(1,0,1,0)
 Title.BackgroundTransparency = 1
-Title.Text = "SL HUB  |  ANTI AFK"
+Title.Text = "SL HUB | ANTI AFK"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 12
-Title.TextColor3 = Color3.fromRGB(0,255,120)
 
--- Labels
+RunService.RenderStepped:Connect(function()
+	Title.TextColor3 = Color3.fromHSV(hue,1,1)
+end)
+
+-- LABEL FUNCTION
 local function createLabel(yPos, text)
 	local L = Instance.new("TextLabel", Main)
 	L.Position = UDim2.new(0,0,yPos,0)
@@ -61,32 +66,27 @@ local function createLabel(yPos, text)
 end
 
 local Status = createLabel(0.28, "Status: Running")
-Status.TextColor3 = Color3.fromRGB(0,255,120)
-
 local TimeLabel = createLabel(0.45, "Time: 0s")
 local FPSLabel = createLabel(0.60, "FPS: 0")
 local PingLabel = createLabel(0.75, "Ping: 0 ms")
 
--- Update Loop
+-- UPDATE LOOP
 spawn(function()
 	while true do
 		task.wait(1)
-
 		local elapsed = math.floor(tick() - startTime)
 		TimeLabel.Text = "Time: "..elapsed.."s"
-
-		local fps = math.floor(1 / RunService.RenderStepped:Wait())
+		local fps = math.floor(1/RunService.RenderStepped:Wait())
 		FPSLabel.Text = "FPS: "..fps
-
 		local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
 		PingLabel.Text = "Ping: "..ping.." ms"
 	end
 end)
 
--- Anti AFK
+-- ANTI AFK
 LocalPlayer.Idled:Connect(function()
-	local VirtualUser = game:GetService("VirtualUser")
-	VirtualUser:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	local vu = game:GetService("VirtualUser")
+	vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 	task.wait(1)
-	VirtualUser:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
