@@ -27,7 +27,7 @@ Instance.new("UICorner", Main)
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 1.5
 
--- RGB ANIMATION FOR STROKE
+-- RGB ANIMATION
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.003) % 1
@@ -52,7 +52,7 @@ RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
 
--- FUNCTION TO CREATE LABELS WITH LINES
+-- LABEL FUNCTION
 local function createLabel(yPos, text)
 	local L = Instance.new("TextLabel", Main)
 	L.Position = UDim2.new(0,0,yPos,0)
@@ -62,14 +62,6 @@ local function createLabel(yPos, text)
 	L.TextSize = 12
 	L.TextColor3 = Color3.fromRGB(220,220,220)
 	L.Text = text
-
-	-- FIXED LINE UNDER LABEL
-	local Line = Instance.new("Frame", Main)
-	Line.Size = UDim2.new(0.9,0,0,1)
-	Line.Position = UDim2.new(0.05,0,yPos+0.025,0)
-	Line.BackgroundColor3 = Color3.fromRGB(100,100,100)
-	Line.BorderSizePixel = 0
-
 	return L
 end
 
