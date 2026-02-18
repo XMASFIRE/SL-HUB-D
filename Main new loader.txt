@@ -2,25 +2,30 @@ repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
-if getgenv().SL_HUB_LOADED then return end
-getgenv().SL_HUB_LOADED = true
+if getgenv().SL_KEY_SYSTEM_EXECUTED then return end
+getgenv().SL_KEY_SYSTEM_EXECUTED = true
 
-local correctKey = "SLONTOP"
+-- ===== KEY =====
+local MAIN_KEY = "SLONTOP"
+local GET_KEY_LINK = "https://discord.gg/YOUR_SERVER"
 
-local KeyGui = Instance.new("ScreenGui", game.CoreGui)
-KeyGui.Name = "SL_KEY_GUI"
+-- ===== KEY GUI =====
+local Gui = Instance.new("ScreenGui", game.CoreGui)
+Gui.Name = "SL_KEY_SYSTEM"
+Gui.ResetOnSpawn = false
 
-local KeyFrame = Instance.new("Frame", KeyGui)
-KeyFrame.Size = UDim2.new(0,350,0,200)
-KeyFrame.Position = UDim2.new(0.5,-175,0.5,-100)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-KeyFrame.Active = true
-KeyFrame.Draggable = true
-Instance.new("UICorner", KeyFrame)
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.new(0,360,0,230)
+Main.Position = UDim2.new(0.5,-180,0.5,-115)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Main.Active = true
+Main.Draggable = true
+Instance.new("UICorner", Main)
 
-local Stroke = Instance.new("UIStroke", KeyFrame)
-Stroke.Thickness = 3
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Thickness = 2
 
 local hue = 0
 RunService.RenderStepped:Connect(function()
@@ -28,111 +33,112 @@ RunService.RenderStepped:Connect(function()
 	Stroke.Color = Color3.fromHSV(hue,1,1)
 end)
 
-local Title = Instance.new("TextLabel", KeyFrame)
-Title.Size = UDim2.new(1,0,0,50)
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1,0,0,45)
 Title.BackgroundTransparency = 1
-Title.Text = "ENTER KEY"
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 22
+Title.Text = "SL HUB KEY SYSTEM"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
 RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
 
-local KeyBox = Instance.new("TextBox", KeyFrame)
-KeyBox.Size = UDim2.new(0.8,0,0,40)
-KeyBox.Position = UDim2.new(0.1,0,0.4,0)
-KeyBox.PlaceholderText = "Enter Key Here"
-KeyBox.Text = ""
-KeyBox.Font = Enum.Font.Gotham
-KeyBox.TextSize = 16
-KeyBox.BackgroundColor3 = Color3.fromRGB(35,35,35)
-KeyBox.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", KeyBox)
+local Box = Instance.new("TextBox", Main)
+Box.Size = UDim2.new(0.85,0,0,40)
+Box.Position = UDim2.new(0.075,0,0.35,0)
+Box.PlaceholderText = "ENTER KEY"
+Box.Text = ""
+Box.Font = Enum.Font.Gotham
+Box.TextSize = 14
+Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Box.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", Box)
 
-local Confirm = Instance.new("TextButton", KeyFrame)
-Confirm.Size = UDim2.new(0.8,0,0,40)
-Confirm.Position = UDim2.new(0.1,0,0.7,0)
-Confirm.Text = "Confirm"
-Confirm.Font = Enum.Font.GothamBold
-Confirm.TextSize = 16
-Confirm.BackgroundColor3 = Color3.fromRGB(35,35,35)
-Confirm.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", Confirm)
-
-function OpenMainMenu()
-	local MenuGui = Instance.new("ScreenGui", game.CoreGui)
-	MenuGui.Name = "SL_MAIN_MENU"
-
-	local Frame = Instance.new("Frame", MenuGui)
-	Frame.Size = UDim2.new(0,400,0,320)
-	Frame.Position = UDim2.new(0.5,-200,0.5,-160)
-	Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-	Frame.Active = true
-	Frame.Draggable = true
-	Instance.new("UICorner", Frame)
-
-	local Stroke2 = Instance.new("UIStroke", Frame)
-	Stroke2.Thickness = 3
-
-	local hue2 = 0
+local function RGBButton(text,pos)
+	local btn = Instance.new("TextButton", Main)
+	btn.Size = UDim2.new(0.4,0,0,36)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", btn)
 	RunService.RenderStepped:Connect(function()
-		hue2 = (hue2 + 0.003) % 1
-		Stroke2.Color = Color3.fromHSV(hue2,1,1)
+		btn.TextColor3 = Color3.fromHSV(hue,1,1)
 	end)
-
-	local Title2 = Instance.new("TextLabel", Frame)
-	Title2.Size = UDim2.new(1,0,0,50)
-	Title2.BackgroundTransparency = 1
-	Title2.Text = "SL HUB"
-	Title2.Font = Enum.Font.GothamBlack
-	Title2.TextSize = 26
-	RunService.RenderStepped:Connect(function()
-		Title2.TextColor3 = Color3.fromHSV(hue2,1,1)
-	end)
-
-	local Holder = Instance.new("Frame", Frame)
-	Holder.Size = UDim2.new(1,0,1,-60)
-	Holder.Position = UDim2.new(0,0,0,60)
-	Holder.BackgroundTransparency = 1
-
-	local UIList = Instance.new("UIListLayout", Holder)
-	UIList.Padding = UDim.new(0,12)
-	UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	UIList.VerticalAlignment = Enum.VerticalAlignment.Center
-
-	local function GameButton(name, url)
-		local btn = Instance.new("TextButton", Holder)
-		btn.Size = UDim2.new(0.85,0,0,50)
-		btn.Text = name
-		btn.Font = Enum.Font.GothamBold
-		btn.TextSize = 16
-		btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-		btn.TextColor3 = Color3.new(1,1,1)
-		Instance.new("UICorner", btn)
-
-		RunService.RenderStepped:Connect(function()
-			btn.TextColor3 = Color3.fromHSV(hue2,1,1)
-		end)
-
-		btn.MouseButton1Click:Connect(function()
-			MenuGui:Destroy()
-			loadstring(game:HttpGet(url))()
-		end)
-	end
-
-	GameButton("Legends Of Speed", "https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20LOS")
-	GameButton("Muscle Legends", "https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ML%20(1).txt")
-	GameButton("Blox Fruits", "https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/BloxFruits")
-	GameButton("Escape Tsunami", "https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/Tusnammi.txt")
+	return btn
 end
 
-Confirm.MouseButton1Click:Connect(function()
-	if KeyBox.Text == correctKey then
-		KeyGui:Destroy()
-		OpenMainMenu()
+local Verify = RGBButton("VERIFY", UDim2.new(0.075,0,0.65,0))
+local GetKey = RGBButton("GET KEY", UDim2.new(0.525,0,0.65,0))
+
+-- ===== VERIFY LOGIC =====
+Verify.MouseButton1Click:Connect(function()
+	local key = string.upper(string.gsub(Box.Text,"%s+",""))
+	if key == MAIN_KEY then
+		Gui:Destroy()
+
+		-- ===== MAIN MENU GUI =====
+		local MenuGui = Instance.new("ScreenGui", game.CoreGui)
+		MenuGui.Name = "SL_MAIN_MENU"
+
+		local Frame = Instance.new("Frame", MenuGui)
+		Frame.Size = UDim2.new(0,360,0,230)
+		Frame.Position = UDim2.new(0.5,-180,0.5,-115)
+		Frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+		Frame.Active = true
+		Frame.Draggable = true
+		Instance.new("UICorner", Frame)
+
+		local Stroke2 = Instance.new("UIStroke", Frame)
+		Stroke2.Thickness = 2
+
+		local hue2 = 0
+		RunService.RenderStepped:Connect(function()
+			hue2 = (hue2 + 0.003) % 1
+			Stroke2.Color = Color3.fromHSV(hue2,1,1)
+		end)
+
+		local Title2 = Instance.new("TextLabel", Frame)
+		Title2.Size = UDim2.new(1,0,0,45)
+		Title2.BackgroundTransparency = 1
+		Title2.Text = "SL HUB"
+		Title2.Font = Enum.Font.GothamBold
+		Title2.TextSize = 18
+		RunService.RenderStepped:Connect(function()
+			Title2.TextColor3 = Color3.fromHSV(hue2,1,1)
+		end)
+
+		local function GameButton(name, url, posY)
+			local btn = Instance.new("TextButton", Frame)
+			btn.Size = UDim2.new(0.85,0,0,36)
+			btn.Position = UDim2.new(0.075,0,posY,0)
+			btn.Text = name
+			btn.Font = Enum.Font.GothamBold
+			btn.TextSize = 14
+			btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+			Instance.new("UICorner", btn)
+			RunService.RenderStepped:Connect(function()
+				btn.TextColor3 = Color3.fromHSV(hue2,1,1)
+			end)
+			btn.MouseButton1Click:Connect(function()
+				loadstring(game:HttpGet(url))()
+			end)
+		end
+
+		GameButton("Legends Of Speed","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20LOS",0.25)
+		GameButton("Muscle Legends","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ML%20(1).txt",0.45)
+		GameButton("Blox Fruits","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/BloxFruits",0.65)
+		GameButton("Escape Tsunami","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/Tusnammi.txt",0.85)
+
 	else
-		KeyBox.Text = "Wrong Key!"
-		task.wait(1)
-		KeyBox.Text = ""
+		Box.Text = ""
+		Box.PlaceholderText = "WRONG KEY!"
+	end
+end)
+
+GetKey.MouseButton1Click:Connect(function()
+	if setclipboard then
+		setclipboard(GET_KEY_LINK)
 	end
 end)
