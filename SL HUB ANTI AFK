@@ -7,7 +7,7 @@ local LocalPlayer = Players.LocalPlayer
 if getgenv().SL_HUB_ANTI_AFK_EXECUTED then return end
 getgenv().SL_HUB_ANTI_AFK_EXECUTED = true
 
--- ===== ANTI AFK VARIABLES =====
+-- ===== VARIABLES =====
 local idleTime = 0
 local attempts = 0
 
@@ -16,11 +16,11 @@ local Gui = Instance.new("ScreenGui", game.CoreGui)
 Gui.Name = "SL_HUB_ANTI_AFK"
 
 local Frame = Instance.new("Frame", Gui)
-Frame.Size = UDim2.new(0,300,0,120)
-Frame.Position = UDim2.new(0.8,0,0.05,0)
+Frame.Size = UDim2.new(0,200,0,200)
+Frame.Position = UDim2.new(0.85,0,0.05,0)
+Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Frame.Active = true
 Frame.Draggable = true
-Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Instance.new("UICorner", Frame)
 
 local Stroke = Instance.new("UIStroke", Frame)
@@ -30,8 +30,7 @@ Stroke.Thickness = 2
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.003) % 1
-	local color = Color3.fromHSV(hue,1,1)
-	Stroke.Color = color
+	Stroke.Color = Color3.fromHSV(hue,1,1)
 end)
 
 -- ===== TITLE =====
@@ -42,7 +41,6 @@ Title.BackgroundTransparency = 1
 Title.Text = "SL HUB ANTI AFK"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
-Title.TextColor3 = Color3.fromRGB(255,255,255)
 RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
@@ -59,14 +57,23 @@ TimeLabel.TextColor3 = Color3.fromRGB(255,255,255)
 
 local AttemptsLabel = Instance.new("TextLabel", Frame)
 AttemptsLabel.Size = UDim2.new(1,0,0,25)
-AttemptsLabel.Position = UDim2.new(0,0,0.55,0)
+AttemptsLabel.Position = UDim2.new(0,0,0.5,0)
 AttemptsLabel.BackgroundTransparency = 1
 AttemptsLabel.Text = "Attempts: 0"
 AttemptsLabel.Font = Enum.Font.Gotham
 AttemptsLabel.TextSize = 14
 AttemptsLabel.TextColor3 = Color3.fromRGB(255,255,255)
 
--- ===== ANTI AFK FUNCTION =====
+local FPSLabel = Instance.new("TextLabel", Frame)
+FPSLabel.Size = UDim2.new(1,0,0,25)
+FPSLabel.Position = UDim2.new(0,0,0.7,0)
+FPSLabel.BackgroundTransparency = 1
+FPSLabel.Text = "FPS: 0"
+FPSLabel.Font = Enum.Font.Gotham
+FPSLabel.TextSize = 14
+FPSLabel.TextColor3 = Color3.fromRGB(255,255,255)
+
+-- ===== ANTI AFK =====
 LocalPlayer.Idled:Connect(function()
 	local VirtualUser = game:GetService("VirtualUser")
 	VirtualUser:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
@@ -82,6 +89,9 @@ spawn(function()
 		idleTime = idleTime + 1
 		TimeLabel.Text = "Idle Time: "..idleTime.."s"
 		AttemptsLabel.Text = "Attempts: "..attempts
+		-- FPS calculation
+		local fps = math.floor(1/RunService.RenderStepped:Wait())
+		FPSLabel.Text = "FPS: "..fps
 	end
 end)
 
