@@ -5,24 +5,13 @@ getgenv().SL_HUB_EXECUTED = true
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
 
--- Anti AFK
-LocalPlayer.Idled:Connect(function()
-	local vu = game:GetService("VirtualUser")
-	vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-	task.wait(1)
-	vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-end)
-
--- Key system
+-- KEY
 local MAIN_KEY = "SLONTOP"
-local GET_KEY_LINK = "https://discord.gg/YOUR_SERVER"
 
--- Key GUI
+-- GUI
 local Gui = Instance.new("ScreenGui", game.CoreGui)
 Gui.Name = "SL_KEY_SYSTEM"
-Gui.ResetOnSpawn = false
 
 local Main = Instance.new("Frame", Gui)
 Main.Size = UDim2.new(0,360,0,230)
@@ -35,7 +24,6 @@ Instance.new("UICorner", Main)
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 2
 
--- RGB animation
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.003) % 1
@@ -48,6 +36,7 @@ Title.BackgroundTransparency = 1
 Title.Text = "SL HUB"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 18
+
 RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
@@ -62,50 +51,39 @@ Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Box.TextColor3 = Color3.fromRGB(255,255,255)
 Instance.new("UICorner", Box)
 
-local function Button(text,pos)
-	local btn = Instance.new("TextButton", Main)
-	btn.Size = UDim2.new(0.4,0,0,36)
-	btn.Position = pos
-	btn.Text = text
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-	Instance.new("UICorner", btn)
+local Verify = Instance.new("TextButton", Main)
+Verify.Size = UDim2.new(0.85,0,0,40)
+Verify.Position = UDim2.new(0.075,0,0.65,0)
+Verify.Text = "VERIFY"
+Verify.Font = Enum.Font.GothamBold
+Verify.TextSize = 14
+Verify.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", Verify)
 
-	RunService.RenderStepped:Connect(function()
-		btn.TextColor3 = Color3.fromHSV(hue,1,1)
-	end)
-
-	return btn
-end
-
-local Verify = Button("VERIFY", UDim2.new(0.075,0,0.65,0))
-local GetKey = Button("GET KEY", UDim2.new(0.525,0,0.65,0))
-
--- Verify
 Verify.MouseButton1Click:Connect(function()
+
 	local key = string.upper(string.gsub(Box.Text,"%s+",""))
+
 	if key == MAIN_KEY then
 		Gui:Destroy()
 
-		-- Main menu GUI
-		local MenuGui = Instance.new("ScreenGui", game.CoreGui)
-		MenuGui.Name = "SL_MAIN_MENU"
+		-- MAIN MENU
+		local Menu = Instance.new("ScreenGui", game.CoreGui)
 
-		local Frame = Instance.new("Frame", MenuGui)
-		Frame.Size = UDim2.new(0,400,0,320)
-		Frame.Position = UDim2.new(0.5,-200,0.5,-160)
+		local Frame = Instance.new("Frame", Menu)
+		Frame.Size = UDim2.new(0,400,0,350)
+		Frame.Position = UDim2.new(0.5,-200,0.5,-175)
 		Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 		Frame.Active = true
 		Frame.Draggable = true
 		Instance.new("UICorner", Frame)
 
-		local UIList = Instance.new("UIListLayout", Frame)
-		UIList.Padding = UDim.new(0,12)
-		UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		UIList.VerticalAlignment = Enum.VerticalAlignment.Center
+		local Layout = Instance.new("UIListLayout", Frame)
+		Layout.Padding = UDim.new(0,12)
+		Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		Layout.VerticalAlignment = Enum.VerticalAlignment.Center
 
-		local function GameButton(name, loadFunction)
+		local function AddButton(name, url)
 			local btn = Instance.new("TextButton", Frame)
 			btn.Size = UDim2.new(0.85,0,0,50)
 			btn.Text = name
@@ -116,42 +94,19 @@ Verify.MouseButton1Click:Connect(function()
 			Instance.new("UICorner", btn)
 
 			btn.MouseButton1Click:Connect(function()
-				if getgenv().GAME_LOADED then return end
-				getgenv().GAME_LOADED = true
-				MenuGui:Destroy()
-				pcall(loadFunction)
+				Menu:Destroy()
+				loadstring(game:HttpGet(url))()
 			end)
 		end
 
-		-- Buttons
-		GameButton("Legends Of Speed", function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20LOS"))()
-		end)
-
-		GameButton("Muscle Legends", function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ML%20(1).txt"))()
-		end)
-
-		GameButton("Blox Fruits", function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/BloxFruits"))()
-		end)
-
-		GameButton("Escape Tsunami", function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/Tusnammi.txt"))()
-		end)
-
-		GameButton("Anti AFK", function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ANTI%20AFK"))()
-		end)
+		AddButton("Legends Of Speed","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20LOS")
+		AddButton("Muscle Legends","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ML%20(1).txt")
+		AddButton("Blox Fruits","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/BloxFruits")
+		AddButton("Escape Tsunami","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/Tusnammi.txt")
+		AddButton("Anti AFK","https://raw.githubusercontent.com/XMASFIRE/SL-HUB-D/refs/heads/main/SL%20HUB%20ANTI%20AFK")
 
 	else
 		Box.Text = ""
-		Box.PlaceholderText = "WRONG KEY!"
-	end
-end)
-
-GetKey.MouseButton1Click:Connect(function()
-	if setclipboard then
-		setclipboard(GET_KEY_LINK)
+		Box.PlaceholderText = "WRONG KEY"
 	end
 end)
