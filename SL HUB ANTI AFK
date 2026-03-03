@@ -3,6 +3,7 @@ repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
 if getgenv().SL_HUB_AFK then return end
@@ -14,7 +15,7 @@ local Gui = Instance.new("ScreenGui", game.CoreGui)
 Gui.Name = "SL_HUB_AFK"
 
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0,220,0,160)
+Main.Size = UDim2.new(0,220,0,190)
 Main.Position = UDim2.new(0.8,0,0.12,0)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.BorderSizePixel = 0
@@ -24,6 +25,7 @@ Instance.new("UICorner", Main)
 
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 1.5
+
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.003) % 1
@@ -42,7 +44,6 @@ Title.BackgroundTransparency = 1
 Title.Text = "SL HUB | ANTI AFK"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 12
-Title.TextColor3 = Color3.fromRGB(255,255,255)
 
 RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
@@ -60,18 +61,63 @@ local function createStat(yPos, text)
 	return label
 end
 
-local TimeLabel = createStat(0.3, "⏰Time: 00:00:00")
-local FPSLabel  = createStat(0.5, "FPS: 0")
-local PingLabel = createStat(0.7, "Ping: 0 ms")
+local TimeLabel = createStat(0.25, "Time: 00:00:00")
+local FPSLabel  = createStat(0.45, "FPS: 0")
+local PingLabel = createStat(0.60, "Ping: 0 ms")
 
-spawn(function()
+local BoostButton = Instance.new("TextButton", Main)
+BoostButton.Size = UDim2.new(1,-20,0,25)
+BoostButton.Position = UDim2.new(0,10,0.80,0)
+BoostButton.BackgroundColor3 = Color3.fromRGB(25,25,25)
+BoostButton.TextColor3 = Color3.fromRGB(255,255,255)
+BoostButton.Font = Enum.Font.GothamBold
+BoostButton.TextSize = 12
+BoostButton.Text = "🚀 FPS Boost: OFF"
+Instance.new("UICorner", BoostButton)
+
+local boosted = false
+
+local function enableBoost()
+	Lighting.GlobalShadows = false
+	Lighting.FogEnd = 100000
+	Lighting.Brightness = 1
+	
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Material = Enum.Material.Plastic
+			v.Reflectance = 0
+		end
+		
+		if v:IsA("ParticleEmitter") or 
+		   v:IsA("Trail") or 
+		   v:IsA("Smoke") or 
+		   v:IsA("Fire") or 
+		   v:IsA("Sparkles") then
+			v.Enabled = false
+		end
+	end
+	
+	settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+end
+
+BoostButton.MouseButton1Click:Connect(function()
+	boosted = not boosted
+	if boosted then
+		enableBoost()
+		BoostButton.Text = "🚀 FPS Boost: ON"
+	else
+		BoostButton.Text = "🚀 FPS Boost: OFF"
+	end
+end)
+
+task.spawn(function()
 	while true do
 		task.wait(1)
 		local elapsed = math.floor(tick() - startTime)
-		local hours = math.floor(elapsed/3600)
-		local minutes = math.floor((elapsed % 3600)/60)
-		local seconds = elapsed % 60
-		TimeLabel.Text = string.format("Time: %02d:%02d:%02d", hours, minutes, seconds)
+		local h = math.floor(elapsed/3600)
+		local m = math.floor((elapsed%3600)/60)
+		local s = elapsed%60
+		TimeLabel.Text = string.format("⏰Time: %02d:%02d:%02d",h,m,s)
 
 		local fps = math.floor(1/RunService.RenderStepped:Wait())
 		FPSLabel.Text = "🚀FPS: "..fps
