@@ -92,7 +92,7 @@ Window:CreateTopbarButton("Save Config", "save", function()
 	WindUI:Notify({
 		Title = "Config Saved!",
 		Content = "Config automatically loads when the script is run",
-		Icon = "rbxassetid://90925193320313",
+		Icon = "rbxassetid://119025343914379",
 		Duration = 5
 	});
 end, 990);
@@ -102,12 +102,12 @@ Window:CreateTopbarButton("Reset Config", "trash-2", function()
 		WindUI:Notify({
 			Title = "Config Deleted!",
 			Content = "Config reset to default",
-			Icon = "rbxassetid://90925193320313",
+			Icon = "rbxassetid://119025343914379",
 			Duration = 5
 		});
 	end;
 end, 989);
-local InviteCode = "dGd8gsSqGp";
+local InviteCode = "eQ8TgyqUdc";
 DiscordLinkButton = Tabs.InfoTab:Button({
 	Title = "Discord Server",
 	Callback = function()
