@@ -10,14 +10,12 @@ getgenv().SL_HUB_AFK = true
 
 local startTime = tick()
 
--- GUI
-local Gui = Instance.new("ScreenGui")
+local Gui = Instance.new("ScreenGui", game.CoreGui)
 Gui.Name = "SL_HUB_AFK"
-Gui.Parent = game.CoreGui
 
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0,190,0,160)
-Main.Position = UDim2.new(0.82,0,0.12,0)
+Main.Size = UDim2.new(0,220,0,160)
+Main.Position = UDim2.new(0.8,0,0.12,0)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.BorderSizePixel = 0
 Main.Active = true
@@ -26,15 +24,12 @@ Instance.new("UICorner", Main)
 
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 1.5
-
--- RGB ANIMATION FOR STROKE
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.003) % 1
 	Stroke.Color = Color3.fromHSV(hue,1,1)
 end)
 
--- TITLE BAR
 local Top = Instance.new("Frame", Main)
 Top.Size = UDim2.new(1,0,0,28)
 Top.BackgroundColor3 = Color3.fromRGB(20,20,20)
@@ -47,51 +42,45 @@ Title.BackgroundTransparency = 1
 Title.Text = "SL HUB | ANTI AFK"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 12
+Title.TextColor3 = Color3.fromRGB(255,255,255)
 
 RunService.RenderStepped:Connect(function()
 	Title.TextColor3 = Color3.fromHSV(hue,1,1)
 end)
 
--- FUNCTION TO CREATE LABELS WITH LINES
-local function createLabel(yPos, text)
-	local L = Instance.new("TextLabel", Main)
-	L.Position = UDim2.new(0,0,yPos,0)
-	L.Size = UDim2.new(1,0,0,22)
-	L.BackgroundTransparency = 1
-	L.Font = Enum.Font.Gotham
-	L.TextSize = 12
-	L.TextColor3 = Color3.fromRGB(220,220,220)
-	L.Text = text
-
-	-- FIXED LINE UNDER LABEL
-	local Line = Instance.new("Frame", Main)
-	Line.Size = UDim2.new(0.9,0,0,1)
-	Line.Position = UDim2.new(0.05,0,yPos+0.025,0)
-	Line.BackgroundColor3 = Color3.fromRGB(100,100,100)
-	Line.BorderSizePixel = 0
-
-	return L
+local function createStat(yPos, text)
+	local label = Instance.new("TextLabel", Main)
+	label.Size = UDim2.new(1,0,0,22)
+	label.Position = UDim2.new(0,0,yPos,0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 12
+	label.TextColor3 = Color3.fromRGB(220,220,220)
+	label.Text = text
+	return label
 end
 
-local Status = createLabel(0.28, "Status: Running")
-local TimeLabel = createLabel(0.45, "Time: 0s")
-local FPSLabel = createLabel(0.60, "FPS: 0")
-local PingLabel = createLabel(0.75, "Ping: 0 ms")
+local TimeLabel = createStat(0.3, "⏰Time: 00:00:00")
+local FPSLabel  = createStat(0.5, "FPS: 0")
+local PingLabel = createStat(0.7, "Ping: 0 ms")
 
--- UPDATE LOOP
 spawn(function()
 	while true do
 		task.wait(1)
 		local elapsed = math.floor(tick() - startTime)
-		TimeLabel.Text = "Time: "..elapsed.."s"
+		local hours = math.floor(elapsed/3600)
+		local minutes = math.floor((elapsed % 3600)/60)
+		local seconds = elapsed % 60
+		TimeLabel.Text = string.format("Time: %02d:%02d:%02d", hours, minutes, seconds)
+
 		local fps = math.floor(1/RunService.RenderStepped:Wait())
-		FPSLabel.Text = "FPS: "..fps
+		FPSLabel.Text = "🚀FPS: "..fps
+
 		local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-		PingLabel.Text = "Ping: "..ping.." ms"
+		PingLabel.Text = "📶Ping: "..ping.." ms"
 	end
 end)
 
--- ANTI AFK
 LocalPlayer.Idled:Connect(function()
 	local vu = game:GetService("VirtualUser")
 	vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
