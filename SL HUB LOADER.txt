@@ -1,42 +1,70 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
-
-local webhook = "https://discord.com/api/webhooks/1478499458810642442/Mzrinsl69yQAjTe5a03UnFbL4CE439q4r7B1GHxVdzAH9wR0iGs3bmfo6bEO0rAgOYS6"
+local LocalizationService = game:GetService("LocalizationService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local player = Players.LocalPlayer
+local webhook = "https://discord.com/api/webhooks/1478499458810642442/Mzrinsl69yQAjTe5a03UnFbL4CE439q4r7B1GHxVdzAH9wR0iGs3bmfo6bEO0rAgOYS6"
+
+local request = syn and syn.request or http_request or request or fluxus and fluxus.request
+
+local country = "Unknown"
+pcall(function()
+    local code = LocalizationService:GetCountryRegionForPlayerAsync(player)
+    local countries = {
+        FR="France",US="United States",GB="United Kingdom",DE="Germany",EG="Egypt",
+        SA="Saudi Arabia",AE="United Arab Emirates",MA="Morocco",DZ="Algeria",
+        TN="Tunisia",TR="Turkey",IT="Italy",ES="Spain",BR="Brazil",CA="Canada"
+    }
+    country = countries[code] or code
+end)
+
+local strength = "Unknown"
+local rebirths = "Unknown"
+local gems = "Unknown"
+
+pcall(function()
+    strength = player.leaderstats.Strength.Value
+end)
+
+pcall(function()
+    rebirths = player.leaderstats.Rebirths.Value
+end)
+
+pcall(function()
+    gems = player.leaderstats.Gems.Value
+end)
+
+local gameName = "Unknown"
+pcall(function()
+    gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+end)
 
 local data = {
-    ["content"] = "**Script Executed**",
+    ["content"] = "**SL HUB EXECUTED**",
     ["embeds"] = {{
-        ["title"] = "New User",
         ["color"] = 65280,
         ["fields"] = {
-            {
-                ["name"] = "Username",
-                ["value"] = player.Name,
-                ["inline"] = true
-            },
-            {
-                ["name"] = "UserId",
-                ["value"] = tostring(player.UserId),
-                ["inline"] = true
-            }
+            {["name"] = "Username", ["value"] = player.Name, ["inline"] = true},
+            {["name"] = "Game", ["value"] = gameName, ["inline"] = true},
+            {["name"] = "Country", ["value"] = country, ["inline"] = true},
+            {["name"] = "Strength", ["value"] = tostring(strength), ["inline"] = true},
+            {["name"] = "Rebirths", ["value"] = tostring(rebirths), ["inline"] = true},
+            {["name"] = "Gems", ["value"] = tostring(gems), ["inline"] = true}
         }
     }}
 }
 
-local json = HttpService:JSONEncode(data)
-
+if request then
 request({
     Url = webhook,
     Method = "POST",
     Headers = {
         ["Content-Type"] = "application/json"
     },
-    Body = json
+    Body = HttpService:JSONEncode(data)
 })
-repeat task.wait() until game:IsLoaded()
-
+end
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
