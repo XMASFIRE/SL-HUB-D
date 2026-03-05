@@ -1,3 +1,40 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+
+local webhook = "https://discord.com/api/webhooks/1478499458810642442/Mzrinsl69yQAjTe5a03UnFbL4CE439q4r7B1GHxVdzAH9wR0iGs3bmfo6bEO0rAgOYS6"
+
+local player = Players.LocalPlayer
+
+local data = {
+    ["content"] = "**Script Executed**",
+    ["embeds"] = {{
+        ["title"] = "New User",
+        ["color"] = 65280,
+        ["fields"] = {
+            {
+                ["name"] = "Username",
+                ["value"] = player.Name,
+                ["inline"] = true
+            },
+            {
+                ["name"] = "UserId",
+                ["value"] = tostring(player.UserId),
+                ["inline"] = true
+            }
+        }
+    }}
+}
+
+local json = HttpService:JSONEncode(data)
+
+request({
+    Url = webhook,
+    Method = "POST",
+    Headers = {
+        ["Content-Type"] = "application/json"
+    },
+    Body = json
+})
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
